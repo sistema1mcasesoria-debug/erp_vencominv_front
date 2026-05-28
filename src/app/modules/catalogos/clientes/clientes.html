@@ -1,0 +1,152 @@
+<div class="p-6 bg-gray-950 min-h-screen text-gray-100">
+  
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-white tracking-tight">Directorio de Clientes</h2>
+      <p class="text-sm text-gray-500 mt-1">Gestiona la información de contacto y facturación de tu cartera.</p>
+    </div>
+    
+    <div class="flex items-center gap-4 w-full sm:w-auto">
+      <div class="relative w-full sm:w-64">
+        <input 
+          type="text" 
+          [ngModel]="busqueda()"
+          (ngModelChange)="busqueda.set($event)"
+          placeholder="Buscar por DNI/RUC o Nombre..."
+          class="w-full bg-gray-900 border border-white/8 rounded-xl px-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        />
+        <svg class="absolute right-3 top-2.5 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+
+      <button 
+        (click)="abrirModalNuevo()"
+        class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-lg flex-shrink-0 cursor-pointer">
+        + NUEVO CLIENTE
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorGlobal() && !modalAbierto()" class="mb-6 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400">
+    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span>{{ errorGlobal() }}</span>
+  </div>
+
+  <div class="bg-gray-900 border border-white/8 rounded-2xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-white/8 bg-gray-800/50 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+            <th class="px-6 py-4">Documento</th>
+            <th class="px-6 py-4">Nombre / Razón Social</th>
+            <th class="px-6 py-4">Contacto</th>
+            <th class="px-6 py-4">Dirección</th>
+            <th class="px-6 py-4 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 text-sm">
+          
+          <tr *ngIf="loading()">
+            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+              <svg class="w-6 h-6 animate-spin mx-auto text-indigo-500 mb-2" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+              Cargando directorio...
+            </td>
+          </tr>
+          
+          <tr *ngIf="!loading() && clientesFiltrados().length === 0">
+            <td colspan="5" class="px-6 py-12 text-center text-gray-500">No se encontraron clientes coincidentes.</td>
+          </tr>
+
+          <tr *ngFor="let c of clientesFiltrados()" class="hover:bg-white/[0.01] transition-colors">
+            <td class="px-6 py-4 font-mono text-gray-300 font-bold">{{ c.documentoIdentidad }}</td>
+            <td class="px-6 py-4 font-bold text-white">{{ c.nombreCompleto }}</td>
+            <td class="px-6 py-4">
+              <div class="flex flex-col text-xs text-gray-400">
+                <span *ngIf="c.telefono" class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg> {{ c.telefono }}</span>
+                <span *ngIf="c.email" class="flex items-center gap-1 mt-0.5"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg> {{ c.email }}</span>
+                <span *ngIf="!c.telefono && !c.email" class="text-gray-600 italic">Sin datos de contacto</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-xs text-gray-400 max-w-xs truncate" [title]="c.direccion">{{ c.direccion || 'No especificada' }}</td>
+            <td class="px-6 py-4 text-center">
+              <button 
+                (click)="abrirModalEditar(c)"
+                class="p-1.5 bg-gray-800 text-indigo-400 hover:text-white hover:bg-indigo-600 rounded-lg transition-colors cursor-pointer" 
+                title="Editar Cliente">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="modalAbierto()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="cerrarModal()" class="absolute inset-0 bg-gray-950/80 backdrop-blur-sm transition-opacity"></div>
+    
+    <div class="bg-gray-900 border border-white/10 w-full max-w-md rounded-2xl shadow-2xl relative z-10 flex flex-col overflow-hidden animate-fade-in">
+      
+      <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-gray-800/30">
+        <h3 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          {{ modoEdicion() ? 'Editar Cliente' : 'Nuevo Cliente' }}
+        </h3>
+        <button (click)="cerrarModal()" class="text-gray-500 hover:text-white transition-colors cursor-pointer p-1">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        
+        <div *ngIf="errorGlobal()" class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400 flex items-center gap-2">
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {{ errorGlobal() }}
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">DNI / RUC <span class="text-red-400">*</span></label>
+          <input type="text" [ngModel]="formCliente().documentoIdentidad" (ngModelChange)="formCliente().documentoIdentidad = $event" class="w-full mt-1.5 bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all font-mono" placeholder="Ej: 20123456789">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Nombre o Razón Social <span class="text-red-400">*</span></label>
+          <input type="text" [ngModel]="formCliente().nombreCompleto" (ngModelChange)="formCliente().nombreCompleto = $event" class="w-full mt-1.5 bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all" placeholder="Ej: AMTECH S.A.C.">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Teléfono</label>
+            <input type="text" [ngModel]="formCliente().telefono" (ngModelChange)="formCliente().telefono = $event" class="w-full mt-1.5 bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 outline-none transition-all" placeholder="Opcional">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</label>
+            <input type="email" [ngModel]="formCliente().email" (ngModelChange)="formCliente().email = $event" class="w-full mt-1.5 bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 outline-none transition-all" placeholder="Opcional">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Dirección de Facturación</label>
+          <input type="text" [ngModel]="formCliente().direccion" (ngModelChange)="formCliente().direccion = $event" class="w-full mt-1.5 bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-indigo-500 outline-none transition-all" placeholder="Opcional">
+        </div>
+
+      </div>
+
+      <div class="px-6 py-4 bg-gray-800/30 border-t border-white/5 flex justify-end gap-3">
+        <button 
+          (click)="cerrarModal()"
+          class="px-5 py-2.5 text-sm font-bold text-gray-400 hover:text-white transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button 
+          (click)="guardarCliente()"
+          [disabled]="submitting()"
+          class="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-900 disabled:text-gray-400 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2 cursor-pointer">
+          <svg *ngIf="submitting()" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+          {{ modoEdicion() ? 'Guardar Cambios' : 'Registrar Cliente' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

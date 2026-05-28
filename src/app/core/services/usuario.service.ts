@@ -1,0 +1,36 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Usuario, UsuarioRequest } from '../models/usuario.model';
+import { Rol } from '../models/rol.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UsuarioService {
+  private http = inject(HttpClient);
+  private baseUrl = 'http://localhost:8080/api/v1';
+
+  obtenerUsuarios(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.baseUrl}/usuarios`);
+  }
+
+  crearUsuario(usuario: UsuarioRequest): Observable<Usuario> {
+    return this.http.post<Usuario>(`${this.baseUrl}/usuarios`, usuario);
+  }
+
+  actualizarUsuario(id: number, usuario: UsuarioRequest): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.baseUrl}/usuarios/${id}`, usuario);
+  }
+
+  desactivarUsuario(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/usuarios/${id}/desactivar`, {});
+  }
+  activarUsuario(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/usuarios/${id}/activar`, {});
+  }
+
+  obtenerRoles(): Observable<Rol[]> {
+    return this.http.get<Rol[]>(`${this.baseUrl}/roles`);
+  }
+}

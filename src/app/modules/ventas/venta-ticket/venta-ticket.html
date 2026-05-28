@@ -1,0 +1,101 @@
+<div *ngIf="isOpen() && venta()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 print:static print:z-auto print:p-0 print:block">
+  
+  <div (click)="cerrar()" class="absolute inset-0 bg-gray-950/90 backdrop-blur-sm print:hidden transition-opacity"></div>
+
+  <div class="relative z-10 flex flex-col md:flex-row gap-6 w-full max-w-4xl max-h-[90vh] print:max-w-none print:max-h-none print:block">
+
+    <div class="flex-1 overflow-y-auto custom-scrollbar flex justify-center print:overflow-visible print:absolute print:top-0 print:left-0 print:w-[80mm] print:m-0">
+      
+      <div id="ticket-impresion" class="bg-white p-4 w-full max-w-[80mm] text-black font-mono shadow-2xl print:shadow-none shrink-0">
+        
+        <div class="text-center space-y-1 border-b border-black/20 pb-4">
+          <h2 class="text-base font-bold uppercase tracking-tight">{{ empresaNombre() }}</h2>
+          <p class="text-[11px]">RUC: {{ empresaRuc() }}</p>
+          <p class="text-[10px] leading-tight">{{ empresaDireccion() }}</p>
+          
+          <div class="mt-3 py-1.5 px-3 bg-gray-100 rounded-lg border border-black/10">
+            <p class="font-bold tracking-wider text-[13px] uppercase">
+              {{ venta()!.tipoComprobante }} ELECTRÓNICA
+            </p>
+            <p class="font-bold mt-0.5">{{ venta()!.comprobante || 'PROVISIONAL' }}</p>
+          </div>
+        </div>
+
+        <div class="py-4 space-y-1 border-b border-black/20 text-[11px]">
+          <p><span class="text-gray-600">Fecha:</span> <span>{{ venta()!.fechaVenta | date:'dd/MM/yyyy HH:mm' }}</span></p>
+          <p><span class="text-gray-600">Cliente:</span> <span class="font-bold uppercase">{{ venta()!.clienteNombre }}</span></p>
+          <p><span class="text-gray-600">Cajero:</span> <span>{{ venta()!.usuarioNombre }}</span></p>
+        </div>
+
+        <div class="py-4 border-b border-black/20">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="text-[10px] font-bold text-gray-600 uppercase tracking-wider border-b border-black/10 pb-1">
+                <th class="pb-1">Desc</th>
+                <th class="text-center pb-1 w-10">Cant</th>
+                <th class="text-right pb-1 w-14">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-black/5 text-[11px]">
+              <tr *ngFor="let det of venta()!.detalle" class="align-top">
+                <td class="py-2 pr-1">
+                  {{ det.productoNombre }}
+                  <span class="block text-[9px] text-gray-500 font-sans">S/ {{ det.precioUnitario | number:'1.2-2' }}</span>
+                </td>
+                <td class="py-2 text-center font-bold">{{ det.cantidad }}</td>
+                <td class="py-2 text-right font-bold">S/ {{ det.subtotal | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="py-4 space-y-1.5 border-b border-black/20 text-[11px]">
+          <div class="flex justify-between text-gray-600">
+            <span>Op. Gravada:</span>
+            <span>S/ {{ venta()!.subtotalSinImpuesto | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between text-gray-600">
+            <span>I.G.V. (18%):</span>
+            <span>S/ {{ venta()!.impuestoTotal | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between text-base font-bold pt-1">
+            <span>TOTAL PAGADO:</span>
+            <span>S/ {{ venta()!.total | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="pt-4 pb-6 text-center space-y-1 text-[10px] text-gray-600">
+          <p class="font-bold text-black">¡Gracias por su preferencia!</p>
+          <p>Representación impresa de la {{ venta()!.tipoComprobante | lowercase }} electrónica.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="w-full md:w-80 bg-gray-900 border border-white/10 p-6 rounded-2xl flex flex-col justify-center print:hidden shrink-0 shadow-2xl">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/20">
+          <svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-white tracking-tight">Comprobante Listo</h3>
+        <p class="text-sm text-gray-500 mt-2">Revise los detalles antes de enviar el documento a la ticketera térmica.</p>
+      </div>
+
+      <div class="space-y-3">
+        <button 
+          (click)="imprimir()"
+          class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex justify-center items-center gap-2 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          IMPRIMIR TICKET
+        </button>
+        
+        <button 
+          (click)="cerrar()"
+          class="w-full bg-gray-800 hover:bg-gray-700 border border-white/10 text-white font-bold py-3.5 rounded-xl transition-all cursor-pointer">
+          CERRAR
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

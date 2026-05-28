@@ -1,0 +1,170 @@
+<div *ngIf="isOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div (click)="cerrar()" class="absolute inset-0 bg-gray-950/80 backdrop-blur-sm transition-opacity"></div>
+  
+  <div class="bg-gray-900 border border-white/10 w-full max-w-6xl rounded-2xl shadow-2xl relative z-10 flex flex-col h-[90vh] overflow-hidden">
+    
+    <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-gray-900">
+      <h3 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+        <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        Punto de Venta (POS)
+      </h3>
+      <button (click)="cerrar()" class="text-gray-500 hover:text-white transition-colors cursor-pointer p-1">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div *ngIf="errorGlobal()" class="mx-6 mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400 shrink-0">
+      <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 10v1"/></svg>
+      <span>{{ errorGlobal() }}</span>
+    </div>
+
+    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      
+      <div class="flex-1 flex flex-col p-6 border-r border-white/5 overflow-hidden">
+        
+        <div class="relative mb-6">
+          <input 
+            type="text" 
+            [ngModel]="busquedaProducto()"
+            (ngModelChange)="busquedaProducto.set($event)"
+            placeholder="Pistolea el código de barras o busca por nombre..."
+            class="w-full bg-gray-800 border-2 border-indigo-500/30 rounded-xl px-4 py-4 text-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
+            autocomplete="off"
+          />
+          <svg class="absolute right-4 top-4 w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+
+          <div *ngIf="productosFiltrados().length > 0" class="absolute z-20 w-full mt-2 bg-gray-800 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+            <ul class="divide-y divide-white/5">
+              <li *ngFor="let p of productosFiltrados()" 
+                  (click)="p.stockDisponible > 0 ? agregarAlCarrito(p) : null"
+                  class="px-4 py-3 flex justify-between items-center transition-colors"
+                  [ngClass]="p.stockDisponible > 0 ? 'hover:bg-indigo-600/20 cursor-pointer' : 'bg-gray-800/80 cursor-not-allowed'">
+                
+                <div [ngClass]="{'opacity-50': p.stockDisponible === 0}">
+                  <p class="text-sm font-bold" [ngClass]="p.stockDisponible > 0 ? 'text-white' : 'text-gray-500 line-through'">{{ p.nombre }}</p>
+                  <p class="text-[11px] font-mono text-gray-400">{{ p.codigoBarras || 'Sin código' }}</p>
+                </div>
+                
+                <div class="text-right flex flex-col items-end">
+                  <p class="text-sm font-bold" [ngClass]="p.stockDisponible > 0 ? 'text-emerald-400' : 'text-gray-600'">S/ {{ p.precioVenta | number:'1.2-2' }}</p>
+                  
+                  <span *ngIf="p.stockDisponible > 0" class="text-[11px] text-gray-400 mt-0.5">
+                    Stock: <span class="font-bold text-indigo-300">{{ p.stockDisponible }}</span>
+                  </span>
+                  
+                  <span *ngIf="p.stockDisponible === 0" class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500/10 text-red-400 uppercase tracking-wider border border-red-500/20">
+                    Agotado
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-1 bg-gray-900 border border-white/5 rounded-xl overflow-hidden flex flex-col">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-800/50 text-[11px] font-semibold text-gray-400 uppercase tracking-wider border-b border-white/5">
+                <th class="px-4 py-3">Producto</th>
+                <th class="px-4 py-3 text-center w-28">Cant.</th>
+                <th class="px-4 py-3 text-right">P. Unit</th>
+                <th class="px-4 py-3 text-right text-white">Subtotal</th>
+                <th class="px-4 py-3 w-10"></th>
+              </tr>
+            </thead>
+          </table>
+          <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+              <tbody class="divide-y divide-white/5 text-sm">
+                <tr *ngIf="carrito().length === 0">
+                  <td colspan="5" class="px-4 py-16 text-center text-gray-500 flex flex-col items-center">
+                    <svg class="w-12 h-12 mb-3 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    Aún no hay productos en la cesta.
+                  </td>
+                </tr>
+                <tr *ngFor="let item of carrito(); let i = index" class="hover:bg-white/[0.01]">
+                  <td class="px-4 py-3 text-gray-200 font-medium">{{ item.producto.nombre }}</td>
+                  <td class="px-4 py-3 text-center">
+                    <input type="number" 
+                           [ngModel]="item.cantidad" 
+                           (ngModelChange)="actualizarCantidad(i, $event)" 
+                           min="1" [max]="item.producto.stockDisponible"
+                           class="w-16 bg-gray-800 border border-white/10 rounded-md px-2 py-1 text-center text-sm font-mono focus:border-indigo-500 focus:outline-none" />
+                  </td>
+                  <td class="px-4 py-3 text-right text-gray-400 font-mono">S/ {{ item.producto.precioVenta | number:'1.2-2' }}</td>
+                  <td class="px-4 py-3 text-right font-bold text-emerald-400 font-mono">S/ {{ item.subtotal | number:'1.2-2' }}</td>
+                  <td class="px-4 py-3 text-center">
+                    <button (click)="removerDelCarrito(i)" class="text-gray-500 hover:text-red-400 p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full lg:w-96 bg-gray-900/50 p-6 flex flex-col overflow-y-auto">
+        
+        <div class="flex p-1 bg-gray-800 rounded-lg mb-6">
+          <button (click)="tipoComprobante.set('BOLETA')" [class.bg-indigo-600]="tipoComprobante() === 'BOLETA'" [class.text-white]="tipoComprobante() === 'BOLETA'" class="flex-1 py-1.5 text-sm font-bold rounded-md text-gray-400 transition-colors">BOLETA</button>
+          <button (click)="tipoComprobante.set('FACTURA')" [class.bg-indigo-600]="tipoComprobante() === 'FACTURA'" [class.text-white]="tipoComprobante() === 'FACTURA'" class="flex-1 py-1.5 text-sm font-bold rounded-md text-gray-400 transition-colors">FACTURA</button>
+        </div>
+
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="text-sm font-bold text-white uppercase tracking-wider">Datos del Cliente</h4>
+          <button (click)="modoNuevoCliente.set(!modoNuevoCliente())" class="text-xs text-indigo-400 hover:text-indigo-300 font-bold underline">
+            {{ modoNuevoCliente() ? 'Buscar Existente' : '+ Nuevo Cliente' }}
+          </button>
+        </div>
+
+        <div *ngIf="!modoNuevoCliente()" class="space-y-4 flex-1">
+          <select 
+            [ngModel]="clienteSeleccionado()?.id" 
+            (ngModelChange)="clienteSeleccionado.set($event)"
+            class="w-full bg-gray-800 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-200 focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+            <option [ngValue]="null" disabled selected>Seleccione un cliente registrado...</option>
+            <option *ngFor="let c of clientes()" [ngValue]="c">{{ c.nombreCompleto }} ({{ c.documentoIdentidad }})</option>
+          </select>
+
+          <div *ngIf="clienteSeleccionado()" class="p-4 bg-gray-800/50 border border-white/5 rounded-xl space-y-2 text-sm">
+            <p><span class="text-gray-500">DNI/RUC:</span> <span class="text-gray-200 font-mono">{{ clienteSeleccionado()!.documentoIdentidad }}</span></p>
+            <p><span class="text-gray-500">Dirección:</span> <span class="text-gray-200 truncate">{{ clienteSeleccionado()!.direccion || 'N/A' }}</span></p>
+          </div>
+        </div>
+
+        <div *ngIf="modoNuevoCliente()" class="space-y-3 flex-1 text-sm">
+          <div>
+            <label class="text-xs text-gray-400">DNI / RUC *</label>
+            <div class="flex gap-2 mt-1">
+              <input type="text" [ngModel]="formCliente().documentoIdentidad" (ngModelChange)="formCliente().documentoIdentidad = $event" class="flex-1 bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white" placeholder="Ej: 78965438">
+              <button class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold transition-colors">Buscar</button> </div>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400">Nombre o Razón Social *</label>
+            <input type="text" [ngModel]="formCliente().nombreCompleto" (ngModelChange)="formCliente().nombreCompleto = $event" class="w-full mt-1 bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400">Dirección</label>
+            <input type="text" [ngModel]="formCliente().direccion" (ngModelChange)="formCliente().direccion = $event" class="w-full mt-1 bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-white/10 shrink-0">
+          <div class="flex justify-between items-end mb-6">
+            <span class="text-gray-400 font-bold">TOTAL A COBRAR</span>
+            <span class="text-4xl font-bold font-mono text-emerald-400">S/ {{ totalVenta() | number:'1.2-2' }}</span>
+          </div>
+          
+          <button 
+            (click)="procesarVenta()"
+            [disabled]="submitting()"
+            class="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 disabled:text-gray-400 text-white font-bold text-lg py-4 rounded-xl shadow-xl shadow-emerald-900/50 transition-all flex justify-center items-center gap-2">
+            <svg *ngIf="submitting()" class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+            {{ submitting() ? 'Procesando...' : 'COBRAR VENTA' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

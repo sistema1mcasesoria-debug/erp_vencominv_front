@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* src/styles.css */
+
+@media print {
+  /* 1. Ocultamos ABSOLUTAMENTE TODO en la pantalla */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. Hacemos visible ÚNICAMENTE el contenedor del ticket y sus hijos */
+  #ticket-impresion, #ticket-impresion * {
+    visibility: visible !important;
+  }
+
+  /* 3. Posicionamos el ticket exactamente en la esquina superior izquierda de la impresora */
+  #ticket-impresion {
+    position: fixed !important; /* 🔥 ¡Cambiado de absolute a fixed! */
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important; /* Ancho estándar de ticketera */
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Forzar tamaño de página en la impresora */
+  @page {
+    size: 80mm auto;
+    margin: 0mm;
+  }
+}

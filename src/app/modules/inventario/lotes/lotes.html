@@ -1,0 +1,123 @@
+<div class="p-6 bg-gray-950 min-h-screen text-gray-100">
+  
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-white tracking-tight">Control de Existencias por Lote</h2>
+      <p class="text-sm text-gray-500 mt-1">Monitorea las fechas de vencimiento, stock reservado por pedidos y mermas.</p>
+    </div>
+    
+    <div class="relative w-full sm:w-80">
+      <input 
+        type="text" 
+        [ngModel]="filtroBusqueda()"
+        (ngModelChange)="filtroBusqueda.set($event)"
+        placeholder="Buscar por descripción o barcode..."
+        class="w-full bg-gray-900 border border-white/8 rounded-xl px-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+      />
+      <svg class="absolute right-3 top-2.5 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    </div>
+  </div>
+
+  <div *ngIf="errorGlobal()" class="mb-6 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400">
+    <svg class="w-5 h-5 text-red-400 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 10v1"/></svg>
+    <span>{{ errorGlobal() }}</span>
+  </div>
+
+  <div class="bg-gray-900 border border-white/8 rounded-2xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-white/8 bg-gray-800/40 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+            <th class="px-4 py-4 w-12 text-center"></th>
+            <th class="px-6 py-4">Descripción del Producto</th>
+            <th class="px-6 py-4 font-mono text-right">Stock Físico</th>
+            <th class="px-6 py-4 font-mono text-right">Reservado</th>
+            <th class="px-6 py-4 font-mono text-right">Disponible para Venta</th>
+            <th class="px-6 py-4 text-center">Estado Lotes</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm">
+          
+          <tr *ngIf="loading()">
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+              <svg class="w-6 h-6 animate-spin mx-auto text-indigo-500 mb-2" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+              Calculando trazas de inventario...
+            </td>
+          </tr>
+          
+          <tr *ngIf="!loading() && inventarioFiltrado().length === 0">
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500">No se encontraron productos coincidentes en el inventario.</td>
+          </tr>
+
+          <ng-container *ngFor="let p of inventarioFiltrado()">
+            <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors group">
+              <td class="p-2 text-center">
+                <button 
+                  (click)="toggleProducto(p.id)" 
+                  [disabled]="p.lotesActivos.length === 0"
+                  class="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer transition-all">
+                  <svg class="w-4 h-4 transform transition-transform duration-200" [class.rotate-90]="p.estaAbierto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-col">
+                  <span class="font-semibold text-gray-200 group-hover:text-indigo-400 transition-colors">{{ p.nombre }}</span>
+                  <span class="text-[11px] text-gray-500 mt-0.5 font-mono">Barcode: {{ p.codigoBarras || 'N/A' }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right font-mono text-gray-300 font-medium">{{ p.stockFisico }}</td>
+              <td class="px-6 py-4 text-right font-mono text-amber-500/80">{{ p.stockReservado }}</td>
+              <td class="px-6 py-4 text-right font-mono">
+                <span class="px-2 py-1 rounded font-bold" 
+                      [ngClass]="p.stockDisponible > 5 ? 'text-emerald-400' : p.stockDisponible > 0 ? 'text-amber-400 bg-amber-500/5' : 'text-red-400 bg-red-500/5'">
+                  {{ p.stockDisponible }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border"
+                      [ngClass]="p.lotesActivos.length > 0 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-gray-800 border-white/5 text-gray-500'">
+                  {{ p.lotesActivos.length }} Lotes Activos
+                </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="p.estaAbierto && p.lotesActivos.length > 0" class="bg-gray-950/60">
+              <td colspan="6" class="p-4 pl-12 border-b border-white/5">
+                <div class="border border-white/5 rounded-xl overflow-hidden bg-gray-900/40 shadow-inner">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-gray-800/30 text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-white/5">
+                        <th class="px-4 py-2.5">Código Lote</th>
+                        <th class="px-4 py-2.5">Fecha Fabricación</th>
+                        <th class="px-4 py-2.5">Fecha Vencimiento</th>
+                        <th class="px-4 py-2.5 text-right">Costo Unitario</th>
+                        <th class="px-4 py-2.5 text-right">Cantidad Inicial</th>
+                        <th class="px-4 py-2.5 text-right text-indigo-400">Stock Actual</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-xs font-mono text-gray-400">
+                      <tr *ngFor="let lote of p.lotesActivos" class="hover:bg-white/[0.02] transition-colors">
+                        <td class="px-4 py-2 text-indigo-300 font-bold uppercase">{{ lote.codigoLote }}</td>
+                        <td class="px-4 py-2">{{ lote.fechaFabricacion | date:'dd/MM/yyyy' }}</td>
+                        <td class="px-4 py-2">
+                            <span [ngClass]="{'text-red-400 font-bold': esLoteVencido(lote.fechaVencimiento)}">
+                                {{ lote.fechaVencimiento | date:'dd/MM/yyyy' }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-2 text-right">S/ {{ lote.costoUnitario | number:'1.2-2' }}</td>
+                        <td class="px-4 py-2 text-right text-gray-500">{{ lote.cantidadInicial }}</td>
+                        <td class="px-4 py-2 text-right font-bold text-emerald-400 bg-emerald-500/[0.02]">{{ lote.cantidadActual }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
