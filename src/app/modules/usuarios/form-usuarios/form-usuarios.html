@@ -1,49 +1,57 @@
 <div *ngIf="isOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
   
-  <div (click)="cerrar()" class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm transition-opacity"></div>
+  <!-- Overlay del Modal -->
+  <div (click)="cerrar()" class="absolute inset-0 bg-gray-900/40 dark:bg-gray-950/60 backdrop-blur-sm transition-opacity"></div>
   
-  <div class="bg-gray-900 border border-white/8 w-full max-w-md rounded-2xl p-6 shadow-2xl relative z-10 space-y-4">
+  <!-- Contenedor del Modal -->
+  <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/8 w-full max-w-md rounded-2xl p-6 shadow-xl dark:shadow-2xl relative z-10 space-y-4 transition-colors duration-200">
     
+    <!-- Header del Modal -->
     <div>
-      <h3 class="text-lg font-bold text-white">{{ isEditMode() ? 'Modificar Perfil de Usuario' : 'Registrar Nuevo Colaborador' }}</h3>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ isEditMode() ? 'Modificar Perfil de Usuario' : 'Registrar Nuevo Colaborador' }}</h3>
       <p class="text-xs text-gray-500 mt-0.5">Define los accesos del personal del ecosistema ERP Suite.</p>
     </div>
 
-    <div *ngIf="errorModal()" class="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2.5 text-xs text-red-400">
-      <svg class="w-4 h-4 text-red-400 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+    <!-- Alerta de Error -->
+    <div *ngIf="errorModal()" class="flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg px-3 py-2.5 text-xs text-red-600 dark:text-red-400 transition-colors">
+      <svg class="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 10v1"/>
       </svg>
       <span>{{ errorModal() }}</span>
     </div>
 
+    <!-- Formulario -->
     <div class="space-y-3.5">
       
+      <!-- Input Nombre Completo -->
       <div class="space-y-1.5">
-        <label class="text-xs font-medium text-gray-400">Nombre Completo <span class="text-indigo-400">*</span></label>
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-400">Nombre Completo <span class="text-blue-600 dark:text-blue-400">*</span></label>
         <input 
           type="text" 
           [ngModel]="formNombreCompleto()"
           (ngModelChange)="formNombreCompleto.set($event)"
           placeholder="Ej: Emilio Del Cantaro"
-          class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+          class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm dark:shadow-none"
         />
       </div>
 
+      <!-- Input Nombre de Usuario -->
       <div class="space-y-1.5">
-        <label class="text-xs font-medium text-gray-400">Nombre de Usuario <span class="text-indigo-400">*</span></label>
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-400">Nombre de Usuario <span class="text-blue-600 dark:text-blue-400">*</span></label>
         <input 
           type="text" 
           [ngModel]="formUsername()"
           (ngModelChange)="formUsername.set($event)"
           placeholder="Ej: Embalador01"
-          class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+          class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm dark:shadow-none"
         />
       </div>
 
+      <!-- Input Contraseña -->
       <div class="space-y-1.5">
         <div class="flex items-center justify-between">
-          <label class="text-xs font-medium text-gray-400">
-            Contraseña <span *ngIf="!isEditMode()" class="text-indigo-400">*</span>
+          <label class="text-xs font-medium text-gray-700 dark:text-gray-400">
+            Contraseña <span *ngIf="!isEditMode()" class="text-blue-600 dark:text-blue-400">*</span>
           </label>
           <span *ngIf="isEditMode()" class="text-[10px] text-gray-500 font-normal italic">Dejar vacío para no cambiar</span>
         </div>
@@ -52,16 +60,17 @@
           [ngModel]="formPassword()"
           (ngModelChange)="formPassword.set($event)"
           placeholder="••••••••"
-          class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+          class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm dark:shadow-none"
         />
       </div>
 
+      <!-- Select Rol -->
       <div class="space-y-1.5">
-        <label class="text-xs font-medium text-gray-400">Rol del Sistema <span class="text-indigo-400">*</span></label>
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-400">Rol del Sistema <span class="text-blue-600 dark:text-blue-400">*</span></label>
         <select 
           [ngModel]="formRolId()"
           (ngModelChange)="formRolId.set($event)"
-          class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors cursor-pointer appearance-none">
+          class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer appearance-none shadow-sm dark:shadow-none">
           <option [ngValue]="null" disabled selected>Selecciona un rol operativo</option>
           <option *ngFor="let r of roles()" [ngValue]="r.id">{{ r.nombre }}</option>
         </select>
@@ -69,17 +78,18 @@
 
     </div>
 
+    <!-- Acciones del Modal -->
     <div class="flex items-center justify-end gap-2 pt-2">
       <button 
         (click)="cerrar()"
         type="button"
-        class="px-4 py-2 text-sm font-semibold text-gray-400 hover:text-white bg-transparent hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+        class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
         Cancelar
       </button>
       <button 
         (click)="guardarUsuario()"
         [disabled]="submitting()"
-        class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10">
+        class="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 cursor-pointer shadow-sm shadow-blue-600/20 dark:shadow-blue-600/10">
         <svg *ngIf="submitting()" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>

@@ -6,8 +6,14 @@ export interface VentaDetalleRequest {
 }
 
 export interface VentaRequest {
-  clienteId: number;
+  clienteId: number | null;
   tipoComprobante: string; // 'FACTURA' o 'BOLETA'
+
+  condicionPago?: 'CONTADO' | 'CREDITO';
+  diasCredito?: number | null;
+  pagoInicial?: number | null;
+  metodoPagoInicial?: string | null;
+
   detalles: VentaDetalleRequest[];
 }
 
@@ -38,4 +44,6 @@ export interface VentaResponse {
   total: number;
   estado: string;          // ENUM mapeado a String
   detalle: VentaDetalleResponse[]; // Tu sub-lista interna de artículos
+  condicionPago: string;
+  estadoPago: string;
 }

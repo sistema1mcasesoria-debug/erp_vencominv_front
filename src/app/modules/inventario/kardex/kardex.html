@@ -1,107 +1,130 @@
-<div class="p-6 bg-gray-950 min-h-screen text-gray-100">
+<!-- Fondo principal adaptado a claro por defecto y oscuro con dark: -->
+<div class="p-6 bg-gray-50 dark:bg-gray-950 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-200">
   
+  <!-- Header de la vista -->
   <div class="flex justify-between items-center mb-8">
     <div>
-      <h2 class="text-2xl font-bold text-white">Kardex y Auditoría</h2>
-      <p class="text-sm text-gray-500">Rastrea cada movimiento de inventario, ventas y ajustes.</p>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Kardex y Auditoría</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Rastrea cada movimiento de inventario, ventas y ajustes.</p>
     </div>
     
+    <!-- Botón Ajuste Manual (Mantenido en Ámbar por ser acción crítica) -->
     <button 
       *ngIf="productoSeleccionadoId()"
       (click)="abrirModalAjuste()" 
-      class="bg-gray-800 border border-amber-500/30 hover:bg-amber-600 text-amber-400 hover:text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-colors cursor-pointer flex items-center gap-2">
+      class="bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-50 dark:hover:bg-amber-600 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-white font-bold px-6 py-3 rounded-xl shadow-sm dark:shadow-lg transition-colors cursor-pointer flex items-center gap-2">
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       AJUSTE MANUAL
     </button>
   </div>
 
-  <div class="mb-6 bg-gray-900 p-4 rounded-xl border border-white/10">
-    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Seleccionar Producto para Auditar</label>
-    <select [ngModel]="productoSeleccionadoId()" (ngModelChange)="cargarHistorial($event)" class="w-full md:w-1/2 bg-gray-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-indigo-500 outline-none">
+  <!-- Selector de Producto -->
+  <div class="mb-6 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-none transition-colors duration-200">
+    <label class="text-xs font-bold text-gray-700 dark:text-gray-400 uppercase tracking-wider mb-2 block">Seleccionar Producto para Auditar</label>
+    <select [ngModel]="productoSeleccionadoId()" (ngModelChange)="cargarHistorial($event)" class="w-full md:w-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors shadow-sm dark:shadow-none cursor-pointer appearance-none">
       <option [ngValue]="null" disabled selected>-- Elige un producto --</option>
       <option *ngFor="let p of productos()" [ngValue]="p.id">{{ p.codigoBarras }} - {{ p.nombre }}</option>
     </select>
   </div>
 
-  <div *ngIf="productoSeleccionadoId()" class="bg-gray-900 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-    <table class="w-full text-left">
-      <thead class="bg-gray-800/50 text-[11px] text-gray-400 uppercase tracking-wider border-b border-white/5">
-        <tr>
-          <th class="px-6 py-4">Fecha y Hora</th>
-          <th class="px-6 py-4">Tipo</th>
-          <th class="px-6 py-4">Motivo / Documento</th>
-          <th class="px-6 py-4">Lote Afectado</th>
-          <th class="px-6 py-4 text-right">Cant. Movimiento</th>
-          <th class="px-6 py-4 text-right text-indigo-400">Saldo del Lote</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-white/5 text-sm">
-        
-        <tr *ngIf="loading()">
-          <td colspan="6" class="px-6 py-12 text-center text-gray-500">Analizando registros...</td>
-        </tr>
-
-        <tr *ngIf="!loading() && movimientos().length === 0">
-          <td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">No hay movimientos registrados para este producto.</td>
-        </tr>
-
-        <tr *ngFor="let m of movimientos()" class="hover:bg-white/[0.01]">
-          <td class="px-6 py-4 text-gray-400 font-mono text-xs">{{ m.fechaMovimiento | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-          <td class="px-6 py-4">
-            <span *ngIf="m.tipoMovimiento === 'ENTRADA'" class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase">ENTRADA</span>
-            <span *ngIf="m.tipoMovimiento === 'SALIDA'" class="px-2.5 py-1 rounded bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold uppercase">SALIDA</span>
-            <span *ngIf="m.tipoMovimiento === 'AJUSTE'" class="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold uppercase">AJUSTE</span>
-          </td>
-          <td class="px-6 py-4 font-medium text-gray-200">{{ m.motivo }}</td>
-          <td class="px-6 py-4 font-mono text-indigo-300">{{ m.codigoLote }}</td>
+  <!-- Tabla del Kardex -->
+  <div *ngIf="productoSeleccionadoId()" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-200">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-white/5 transition-colors">
+          <tr>
+            <th class="px-6 py-4">Fecha y Hora</th>
+            <th class="px-6 py-4">Tipo</th>
+            <th class="px-6 py-4">Motivo / Documento</th>
+            <th class="px-6 py-4">Lote Afectado</th>
+            <th class="px-6 py-4 text-right">Cant. Movimiento</th>
+            <th class="px-6 py-4 text-right text-blue-600 dark:text-blue-400">Saldo del Lote</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-white/5 text-sm transition-colors">
           
-          <td class="px-6 py-4 text-right font-mono font-bold" [ngClass]="m.tipoMovimiento === 'SALIDA' || m.cantidad < 0 ? 'text-red-400' : 'text-emerald-400'">
-            {{ m.tipoMovimiento === 'SALIDA' || m.cantidad < 0 ? '' : '+' }}{{ m.cantidad }}
-          </td>
-          
-          <td class="px-6 py-4 text-right font-mono font-bold text-white">{{ m.saldoLote }}</td>
-        </tr>
-      </tbody>
-    </table>
+          <tr *ngIf="loading()">
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+              <svg class="w-6 h-6 animate-spin mx-auto text-blue-600 dark:text-blue-500 mb-2" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
+              Analizando registros...
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading() && movimientos().length === 0">
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">No hay movimientos registrados para este producto.</td>
+          </tr>
+
+          <tr *ngFor="let m of movimientos()" class="hover:bg-gray-50 dark:hover:bg-white/[0.01] transition-colors">
+            <td class="px-6 py-4 text-gray-600 dark:text-gray-400 font-mono text-xs">{{ m.fechaMovimiento | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td class="px-6 py-4">
+              <!-- Badges de Tipo de Movimiento -->
+              <span *ngIf="m.tipoMovimiento === 'ENTRADA'" class="px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-[10px] font-bold uppercase transition-colors">ENTRADA</span>
+              <span *ngIf="m.tipoMovimiento === 'SALIDA'" class="px-2.5 py-1 rounded bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 text-[10px] font-bold uppercase transition-colors">SALIDA</span>
+              <span *ngIf="m.tipoMovimiento === 'AJUSTE'" class="px-2.5 py-1 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 text-[10px] font-bold uppercase transition-colors">AJUSTE</span>
+            </td>
+            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-200">{{ m.motivo }}</td>
+            <td class="px-6 py-4 font-mono text-blue-600 dark:text-blue-300">{{ m.codigoLote }}</td>
+            
+            <td class="px-6 py-4 text-right font-mono font-bold" [ngClass]="m.tipoMovimiento === 'SALIDA' || m.cantidad < 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'">
+              {{ m.tipoMovimiento === 'SALIDA' || m.cantidad < 0 ? '' : '+' }}{{ m.cantidad }}
+            </td>
+            
+            <td class="px-6 py-4 text-right font-mono font-bold text-gray-900 dark:text-white">{{ m.saldoLote }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
+  <!-- Modal de Ajuste Manual -->
   <div *ngIf="modalAjusteAbierto()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div (click)="modalAjusteAbierto.set(false)" class="absolute inset-0 bg-gray-950/80 backdrop-blur-sm transition-opacity"></div>
+    <!-- Overlay -->
+    <div (click)="modalAjusteAbierto.set(false)" class="absolute inset-0 bg-gray-900/40 dark:bg-gray-950/80 backdrop-blur-sm transition-opacity"></div>
     
-    <div class="bg-gray-900 border border-white/10 w-full max-w-md rounded-2xl shadow-2xl relative z-10 flex flex-col overflow-hidden animate-fade-in">
-      <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-gray-800/30">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+    <!-- Contenedor del Modal -->
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 w-full max-w-md rounded-2xl shadow-xl dark:shadow-2xl relative z-10 flex flex-col overflow-hidden animate-fade-in transition-colors duration-200">
+      
+      <!-- Header del Modal -->
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-white/5 flex justify-between items-center bg-gray-50 dark:bg-gray-800/30 transition-colors">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
           Ajuste Manual de Stock
         </h3>
-        <button (click)="modalAjusteAbierto.set(false)" class="text-gray-500 hover:text-white p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        <button (click)="modalAjusteAbierto.set(false)" class="text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
       </div>
 
+      <!-- Formulario del Modal -->
       <div class="p-6 space-y-4">
-        <div *ngIf="errorGlobal()" class="p-3 bg-red-500/10 text-red-400 rounded-lg text-sm">{{ errorGlobal() }}</div>
+        <div *ngIf="errorGlobal()" class="p-3 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg text-sm transition-colors">{{ errorGlobal() }}</div>
 
         <div>
-          <label class="text-xs font-bold text-gray-400 uppercase">Seleccionar Lote Afectado</label>
-          <select [ngModel]="formAjuste().loteId" (ngModelChange)="formAjuste().loteId = $event" class="w-full mt-1.5 bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none">
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-400 uppercase">Seleccionar Lote Afectado</label>
+          <select [ngModel]="formAjuste().loteId" (ngModelChange)="formAjuste().loteId = $event" class="w-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors shadow-sm dark:shadow-none cursor-pointer appearance-none">
             <option [ngValue]="0" disabled>-- Lotes Activos --</option>
             <option *ngFor="let l of lotesDisponibles()" [ngValue]="l.id">Lote: {{ l.codigoLote }} (Stock actual: {{ l.cantidadActual }})</option>
           </select>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-gray-400 uppercase">Cantidad a Ajustar</label>
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-400 uppercase">Cantidad a Ajustar</label>
           <p class="text-[10px] text-gray-500 mb-1">Usa números negativos (-) para restar stock perdido, o positivos (+) si encontraste stock extra.</p>
-          <input type="number" [ngModel]="formAjuste().cantidad" (ngModelChange)="formAjuste().cantidad = $event" class="w-full bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white font-mono outline-none">
+          <input type="number" [ngModel]="formAjuste().cantidad" (ngModelChange)="formAjuste().cantidad = $event" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors shadow-sm dark:shadow-none">
         </div>
 
         <div>
-          <label class="text-xs font-bold text-gray-400 uppercase">Motivo / Justificación</label>
-          <input type="text" [ngModel]="formAjuste().motivo" (ngModelChange)="formAjuste().motivo = $event" placeholder="Ej: Merma por producto dañado" class="w-full mt-1.5 bg-gray-800 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none">
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-400 uppercase">Motivo / Justificación</label>
+          <input type="text" [ngModel]="formAjuste().motivo" (ngModelChange)="formAjuste().motivo = $event" placeholder="Ej: Merma por producto dañado" class="w-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors shadow-sm dark:shadow-none">
         </div>
       </div>
 
-      <div class="px-6 py-4 bg-gray-800/30 border-t border-white/5 flex justify-end">
-        <button (click)="guardarAjuste()" [disabled]="submittingAjuste()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-lg flex items-center gap-2">
+      <!-- Footer del Modal -->
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/30 border-t border-gray-200 dark:border-white/5 flex justify-end transition-colors">
+        <button (click)="guardarAjuste()" [disabled]="submittingAjuste()" class="bg-amber-600 hover:bg-amber-700 dark:hover:bg-amber-500 disabled:opacity-50 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-sm dark:shadow-lg flex items-center gap-2">
+          <svg *ngIf="submittingAjuste()" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
           {{ submittingAjuste() ? 'Guardando...' : 'Aplicar Ajuste' }}
         </button>
       </div>

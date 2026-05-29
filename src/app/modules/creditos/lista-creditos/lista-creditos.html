@@ -1,0 +1,177 @@
+<div class="p-6 bg-gray-50 dark:bg-gray-950 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-200">
+  
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Cuentas por Cobrar</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestiona los créditos activos y registra los pagos de tus clientes.</p>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-900 px-6 py-3 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm dark:shadow-none flex flex-col items-end transition-colors">
+      <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold">Total por Cobrar</span>
+      <span class="text-2xl font-mono font-bold text-amber-600 dark:text-amber-400">S/ {{ totalPorCobrar() | number:'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="errorGlobal()" class="mb-6 flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-600 dark:text-red-400 transition-colors">
+    <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 10v1"/></svg>
+    <span>{{ errorGlobal() }}</span>
+  </div>
+
+  <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-200">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors">
+            <th class="px-6 py-4">Comprobante / Vencimiento</th>
+            <th class="px-6 py-4">Cliente</th>
+            <th class="px-6 py-4 text-right">Total Facturado</th>
+            <th class="px-6 py-4 text-right text-amber-600 dark:text-amber-400">Saldo Pendiente</th>
+            <th class="px-6 py-4 text-center">Estado</th>
+            <th class="px-6 py-4 text-center w-32">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-white/5 text-sm transition-colors">
+          
+          <tr *ngIf="loading()">
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+              <svg class="w-6 h-6 animate-spin mx-auto text-blue-600 dark:text-blue-500 mb-2" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+              Calculando cartera de clientes...
+            </td>
+          </tr>
+          
+          <tr *ngIf="!loading() && deudas().length === 0">
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+              ¡Excelente! No tienes cuentas por cobrar pendientes.
+            </td>
+          </tr>
+
+          <tr *ngFor="let v of deudas()" class="hover:bg-gray-50 dark:hover:bg-white/[0.01] transition-colors">
+            <td class="px-6 py-4">
+              <span class="font-bold text-gray-900 dark:text-white">{{ v.comprobante }}</span>
+              <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Vence: <span class="font-medium text-red-500 dark:text-red-400">{{ v.fechaVencimiento | date:'dd/MM/yyyy' }}</span>
+              </span>
+            </td>
+            
+            <td class="px-6 py-4 font-bold text-gray-700 dark:text-gray-300">
+              {{ v.clienteNombre || 'Desconocido' }}
+            </td>
+            
+            <td class="px-6 py-4 text-right text-gray-500 dark:text-gray-400 font-mono">
+              S/ {{ v.total | number:'1.2-2' }}
+            </td>
+            
+            <td class="px-6 py-4 text-right font-mono text-amber-600 dark:text-amber-400 font-bold text-base">
+              S/ {{ v.saldoPendiente | number:'1.2-2' }}
+            </td>
+            
+            <td class="px-6 py-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border transition-colors"
+                [ngClass]="v.estadoPago === 'PARCIAL' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400' : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400'">
+                {{ v.estadoPago }}
+              </span>
+            </td>
+            
+            <td class="px-6 py-4 text-center">
+              <button 
+                (click)="abrirModalPago(v)"
+                class="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white text-[11px] font-bold px-3 py-2 rounded-lg transition-colors cursor-pointer shadow-sm dark:shadow-none w-full">
+                Cobrar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div *ngIf="modalPagoAbierto()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div (click)="cerrarModalPago()" class="absolute inset-0 bg-gray-900/40 dark:bg-gray-950/80 backdrop-blur-sm transition-opacity"></div>
+    
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 w-full max-w-md rounded-2xl shadow-xl dark:shadow-2xl relative z-10 flex flex-col overflow-hidden animate-fade-in transition-colors duration-200">
+      
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-gray-800/30 flex justify-between items-center transition-colors">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Registrar Pago
+        </h3>
+        <button (click)="cerrarModalPago()" class="text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5">
+        
+        <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 transition-colors">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">Comprobante</span>
+            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ ventaCobrar()?.comprobante }}</span>
+          </div>
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-xs text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">Cliente</span>
+            <span class="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[200px]">{{ ventaCobrar()?.clienteNombre }}</span>
+          </div>
+          <div class="pt-3 border-t border-amber-200 dark:border-amber-500/20 flex justify-between items-center">
+            <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Saldo Actual:</span>
+            <span class="text-xl font-bold font-mono text-amber-600 dark:text-amber-400">S/ {{ ventaCobrar()?.saldoPendiente | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-bold text-gray-700 dark:text-gray-400 uppercase">Monto a Pagar (S/)</label>
+            <input 
+              type="number" 
+              [ngModel]="formAbono().monto" 
+              (ngModelChange)="formAbono().monto = $event" 
+              min="0.1" 
+              [max]="ventaCobrar()?.saldoPendiente"
+              class="w-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-xl px-4 py-3 text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm dark:shadow-none"
+            >
+            <p *ngIf="formAbono().monto > ventaCobrar()?.saldoPendiente" class="text-[10px] text-red-500 mt-1 font-medium">El monto excede el saldo pendiente.</p>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="text-xs font-bold text-gray-700 dark:text-gray-400 uppercase">Método</label>
+              <select 
+                [ngModel]="formAbono().metodoPago" 
+                (ngModelChange)="formAbono().metodoPago = $event"
+                class="w-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-xl px-3 py-2.5 text-sm text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm dark:shadow-none">
+                <option value="EFECTIVO">Efectivo</option>
+                <option value="YAPE">Yape / Plin</option>
+                <option value="TRANSFERENCIA">Transferencia</option>
+                <option value="TARJETA">Tarjeta</option>
+              </select>
+            </div>
+            <div class="flex-1">
+              <label class="text-xs font-bold text-gray-700 dark:text-gray-400 uppercase">Ref. (Opcional)</label>
+              <input 
+                type="text" 
+                [ngModel]="formAbono().referencia" 
+                (ngModelChange)="formAbono().referencia = $event"
+                placeholder="Nro. Operación"
+                class="w-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-xl px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm dark:shadow-none"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/30 border-t border-gray-200 dark:border-white/5 flex justify-end gap-3 transition-colors">
+        <button 
+          (click)="cerrarModalPago()" 
+          class="px-5 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button 
+          (click)="registrarPago()"
+          [disabled]="procesandoPago() || formAbono().monto <= 0 || formAbono().monto > ventaCobrar()?.saldoPendiente"
+          class="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-6 py-2.5 rounded-xl transition-all shadow-sm shadow-blue-600/20 dark:shadow-blue-600/10 flex items-center gap-2 cursor-pointer">
+          <svg *ngIf="procesandoPago()" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+          {{ procesandoPago() ? 'Procesando...' : 'Confirmar Pago' }}
+        </button>
+      </div>
+
+    </div>
+  </div>

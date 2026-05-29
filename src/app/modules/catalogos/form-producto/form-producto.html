@@ -1,93 +1,108 @@
 <div *ngIf="isOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div (click)="cerrar()" class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm transition-opacity"></div>
+  <!-- Overlay del Modal -->
+  <div (click)="cerrar()" class="absolute inset-0 bg-gray-900/40 dark:bg-gray-950/60 backdrop-blur-sm transition-opacity"></div>
   
-  <div class="bg-gray-900 border border-white/8 w-full max-w-md rounded-2xl p-6 shadow-2xl relative z-10 space-y-4">
+  <!-- Contenedor del Modal -->
+  <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/8 w-full max-w-md rounded-2xl p-6 shadow-xl dark:shadow-2xl relative z-10 space-y-4 transition-colors duration-200">
+    
+    <!-- Título y Descripción -->
     <div>
-      <h3 class="text-lg font-bold text-white">{{ isEditMode() ? 'Modificar Ficha de Producto' : 'Añadir Nuevo Producto al Catálogo' }}</h3>
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ isEditMode() ? 'Modificar Ficha de Producto' : 'Añadir Nuevo Producto al Catálogo' }}</h3>
       <p class="text-xs text-gray-500 mt-0.5">Establece códigos, categorías y precios de venta para el ERP.</p>
     </div>
 
-    <div *ngIf="errorModal()" class="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2.5 text-xs text-red-400">
-      <svg class="w-4 h-4 text-red-400 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+    <!-- Alerta de Error -->
+    <div *ngIf="errorModal()" class="flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg px-3 py-2.5 text-xs text-red-600 dark:text-red-400 transition-colors">
+      <svg class="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 10v1"/>
       </svg>
       <span>{{ errorModal() }}</span>
     </div>
 
+    <!-- Formulario -->
     <div class="space-y-3.5">
+      
+      <!-- Input Código de Barras -->
       <div class="space-y-1.5">
-        <label class="text-xs font-medium text-gray-400">Código de Barras / SKU</label>
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-400">Código de Barras / SKU</label>
         <input 
           type="text" 
           [ngModel]="formCodigoBarras()"
           (ngModelChange)="formCodigoBarras.set($event)"
           placeholder="Ej: 5874963214569"
-          class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors font-mono"
+          class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors font-mono shadow-sm dark:shadow-none"
         />
       </div>
 
+      <!-- Input Nombre del Producto -->
       <div class="space-y-1.5">
-        <label class="text-xs font-medium text-gray-400">Nombre del Producto <span class="text-indigo-400">*</span></label>
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-400">Nombre del Producto <span class="text-blue-600 dark:text-blue-400">*</span></label>
         <input 
           type="text" 
           [ngModel]="formNombre()"
           (ngModelChange)="formNombre.set($event)"
           placeholder="Ej: Inyección de Adalida 78"
-          class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+          class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm dark:shadow-none"
         />
       </div>
 
+      <!-- Selects Categoría y U. Medida -->
       <div class="grid grid-cols-2 gap-4">
+        
+        <!-- Categoría -->
         <div class="space-y-1.5">
-          <label class="text-xs font-medium text-gray-400">Categoría <span class="text-indigo-400">*</span></label>
+          <label class="text-xs font-medium text-gray-700 dark:text-gray-400">Categoría <span class="text-blue-600 dark:text-blue-400">*</span></label>
           <select 
             [ngModel]="formCategoriaId()"
             (ngModelChange)="formCategoriaId.set($event)"
-            class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors cursor-pointer appearance-none">
+            class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer appearance-none shadow-sm dark:shadow-none">
             <option [ngValue]="null" disabled selected>Seleccionar</option>
-            <option *ngFor="let cat of   categoriasActivas()" [ngValue]="cat.id">{{ cat.nombre }}</option>
+            <option *ngFor="let cat of categoriasActivas()" [ngValue]="cat.id">{{ cat.nombre }}</option>
           </select>
         </div>
 
+        <!-- U. Medida -->
         <div class="space-y-1.5">
-          <label class="text-xs font-medium text-gray-400">U. Medida <span class="text-indigo-400">*</span></label>
+          <label class="text-xs font-medium text-gray-700 dark:text-gray-400">U. Medida <span class="text-blue-600 dark:text-blue-400">*</span></label>
           <select 
             [ngModel]="formUnidadMedidaId()"
             (ngModelChange)="formUnidadMedidaId.set($event)"
-            class="w-full bg-gray-800 border border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors cursor-pointer appearance-none">
+            class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer appearance-none shadow-sm dark:shadow-none">
             <option [ngValue]="null" disabled selected>Seleccionar</option>
             <option *ngFor="let uni of unidadesMedida()" [ngValue]="uni.id">{{ uni.nombre }} ({{ uni.abreviatura }})</option>
           </select>
         </div>
       </div>
 
+      <!-- Input PVP -->
       <div class="space-y-1.5">
-        <label class="text-xs font-medium text-gray-400">Precio de Venta al Público (PEN) <span class="text-indigo-400">*</span></label>
+        <label class="text-xs font-medium text-gray-700 dark:text-gray-400">Precio de Venta al Público (PEN) <span class="text-blue-600 dark:text-blue-400">*</span></label>
         <div class="relative flex items-center">
-          <span class="absolute left-3 text-sm text-gray-500 font-medium">S/</span>
+          <span class="absolute left-3 text-sm text-gray-500 dark:text-gray-400 font-medium">S/</span>
           <input 
             type="number" 
             step="0.01"
             [ngModel]="formPrecioVenta()"
             (ngModelChange)="formPrecioVenta.set($event)"
             placeholder="0.00"
-            class="w-full bg-gray-800 border border-white/8 rounded-lg pl-8 pr-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors font-mono"
+            class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/8 rounded-lg pl-8 pr-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors font-mono shadow-sm dark:shadow-none"
           />
         </div>
       </div>
     </div>
 
+    <!-- Botones de Acción -->
     <div class="flex items-center justify-end gap-2 pt-2">
       <button 
         (click)="cerrar()"
         type="button"
-        class="px-4 py-2 text-sm font-semibold text-gray-400 hover:text-white bg-transparent hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+        class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
         Cancelar
       </button>
       <button 
         (click)="guardarProducto()"
         [disabled]="submitting()"
-        class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10">
+        class="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 cursor-pointer shadow-sm shadow-blue-600/20 dark:shadow-blue-600/10">
         <svg *ngIf="submitting()" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
         </svg>

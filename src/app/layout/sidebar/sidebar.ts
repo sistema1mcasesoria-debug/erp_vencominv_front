@@ -35,8 +35,12 @@ export class SidebarComponent {
     { label: 'Compras',     icon: 'shopping-cart', route: '/modules/compras',    roles: ['ADMINISTRADOR','ALMACENERO'] },
     { label: 'Pedidos',     icon: 'clipboard',     route: '/modules/pedidos',    roles: ['ADMINISTRADOR','CAJERO','ALMACENERO','EMBALADOR'] },
     { label: 'Ventas',      icon: 'receipt',       route: '/modules/ventas',     roles: ['ADMINISTRADOR','CAJERO'] },
-    { label: 'Clientes',    icon: 'user-cog',     route: '/modules/catalogos/clientes',        roles: ['CAJERO'] },
-    { label: 'Kardex',    icon: 'user-cog',     route: '/modules/inventario/kardex',        roles: ['ADMINISTRADOR','CAJERO'] },
+    { label: 'Clientes',    icon: 'users',         route: '/modules/catalogos/clientes', roles: ['CAJERO'] },
+    
+    // 🔥 CORREGIDOS: Íconos, rutas limpias y roles adecuados
+    { label: 'Kardex',      icon: 'clipboard',     route: '/modules/inventario/kardex',  roles: ['ADMINISTRADOR','ALMACENERO'] },
+    { label: 'Reportes',    icon: 'bar-chart',     route: '/modules/reportes',           roles: ['ADMINISTRADOR'] }, 
+    { label: 'Creditos',    icon: 'bar-chart',     route: '/modules/creditos',           roles: ['ADMINISTRADOR'] }, 
     
     // ── Menú Desplegable ──
     { 
@@ -48,7 +52,7 @@ export class SidebarComponent {
         { label: 'Unidades Medida', icon: 'clipboard', route: '/modules/catalogos/unidades-medida', roles: ['ADMINISTRADOR','ALMACENERO'] },
         { label: 'Clientes',        icon: 'users',     route: '/modules/catalogos/clientes',        roles: ['ADMINISTRADOR','CAJERO'] },
         { label: 'Proveedores',     icon: 'truck',     route: '/modules/catalogos/proveedores',     roles: ['ADMINISTRADOR','ALMACENERO'] },
-        { label: 'Productos',     icon: 'truck',     route: '/modules/catalogos/productos',     roles: ['ADMINISTRADOR','ALMACENERO'] },
+        { label: 'Productos',       icon: 'box',       route: '/modules/catalogos/productos',       roles: ['ADMINISTRADOR','ALMACENERO'] },
       ]
     },
     

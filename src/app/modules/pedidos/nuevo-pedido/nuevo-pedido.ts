@@ -78,12 +78,14 @@ export class NuevoPedido implements OnInit {
 
   extraerVendedorDelToken() {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('erp_token');
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        this.vendedorId.set(payload.id || payload.usuarioId || 4); 
+        this.vendedorId.set(payload.usuario_id); // ← nombre exacto del claim
       }
-    } catch (e) { console.error('Error al leer token'); }
+    } catch (e) { 
+      console.error('Error al leer token'); 
+    }
   }
 
   agregarAlCarrito(prod: Producto) {

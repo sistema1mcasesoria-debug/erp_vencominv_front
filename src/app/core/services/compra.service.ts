@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CompraRequest, CompraResponse } from '../models/compra.model';
+import { CompraRequest, CompraResponse, PagoProveedorRequest } from '../models/compra.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,5 +16,14 @@ export class CompraService {
 
   obtenerCompras(): Observable<CompraResponse[]> {
     return this.http.get<CompraResponse[]>(this.baseUrl);
+  }
+
+  // --- NUEVOS MÉTODOS ---
+  obtenerCuentasPorPagar(): Observable<CompraResponse[]> {
+    return this.http.get<CompraResponse[]>(`${this.baseUrl}/pendientes`);
+  }
+
+  registrarPagoProveedor(pago: PagoProveedorRequest): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/pagos`, pago);
   }
 }

@@ -9,7 +9,6 @@ import { ClienteResponse, ClienteRequest } from '../../../core/models/cliente.mo
 import { Producto } from '../../../core/models/producto.model';
 import { VentaRequest } from '../../../core/models/venta.model';
 
-// Interfaz interna para el carrito
 interface ItemCarrito {
   producto: Producto;
   cantidad: number;
@@ -31,7 +30,6 @@ export class NuevaVenta implements OnInit {
   onCerrar = output<void>();
   onGuardadoExitoso = output<void>();
 
-  // --- ESTADOS GLOBALES ---
   loading = signal(false);
   errorGlobal = signal('');
   submitting = signal(false);
@@ -40,30 +38,31 @@ export class NuevaVenta implements OnInit {
   clientes = signal<ClienteResponse[]>([]);
   modoNuevoCliente = signal(false);
   clienteSeleccionado = signal<ClienteResponse | null>(null);
-  
-  // Formulario Nuevo Cliente
   formCliente = signal<ClienteRequest>({ nombreCompleto: '', documentoIdentidad: '', telefono: '', email: '', direccion: '' });
 
   // --- LÓGICA DE PRODUCTOS Y CARRITO ---
   productos = signal<Producto[]>([]);
   busquedaProducto = signal('');
   carrito = signal<ItemCarrito[]>([]);
-  tipoComprobante = signal('BOLETA'); // Por defecto
+  tipoComprobante = signal('BOLETA'); 
 
-  // Autocomplete Productos (Filtra por nombre o barcode, MUESTRA TODOS incluyendo los agotados)
+  // --- NUEVAS VARIABLES DE CRÉDITO ---
+  condicionPago = signal<'CONTADO' | 'CREDITO'>('CONTADO');
+  diasCredito = signal<number>(15);
+  pagoInicial = signal<number>(0);
+  metodoPagoInicial = signal<string>('EFECTIVO');
+
   productosFiltrados = computed(() => {
     const term = this.busquedaProducto().toLowerCase().trim();
     if (!term) return [];
     return this.productos().filter(p => 
       p.nombre.toLowerCase().includes(term) || (p.codigoBarras && p.codigoBarras.includes(term))
-    ).slice(0, 5); // Mostrar máximo 5 resultados rápidos
+    ).slice(0, 5); 
   });
 
-  // Totales
   totalVenta = computed(() => this.carrito().reduce((acc, item) => acc + item.subtotal, 0));
 
   constructor() {
-    // Resetear form al abrir
     effect(() => {
       if (this.isOpen()) {
         this.resetearFormulario();
@@ -80,7 +79,6 @@ export class NuevaVenta implements OnInit {
     this.productoService.obtenerProductos().subscribe(data => this.productos.set(data));
   }
 
-  // --- FUNCIONES DEL CARRITO ---
   agregarAlCarrito(prod: Producto) {
     this.carrito.update(items => {
       const existe = items.find(i => i.producto.id === prod.id);
@@ -96,7 +94,7 @@ export class NuevaVenta implements OnInit {
         return [...items, { producto: prod, cantidad: 1, subtotal: prod.precioVenta }];
       }
     });
-    this.busquedaProducto.set(''); // Limpiar buscador tras agregar
+    this.busquedaProducto.set(''); 
     this.errorGlobal.set('');
   }
 
@@ -124,17 +122,26 @@ export class NuevaVenta implements OnInit {
     this.carrito.update(items => items.filter((_, i) => i !== index));
   }
 
-  // --- PROCESAR VENTA ---
   procesarVenta() {
     if (this.carrito().length === 0) {
       this.errorGlobal.set('El carrito está vacío.');
       return;
     }
 
+    // VALIDACIÓN DE CRÉDITO
+    if (this.condicionPago() === 'CREDITO' && !this.modoNuevoCliente() && !this.clienteSeleccionado()) {
+      this.errorGlobal.set('Para ventas a crédito, debe seleccionar o crear un cliente obligatoriamente.');
+      return;
+    }
+
+    if (this.condicionPago() === 'CREDITO' && this.pagoInicial() > this.totalVenta()) {
+      this.errorGlobal.set('El adelanto no puede ser mayor al total de la venta.');
+      return;
+    }
+
     this.submitting.set(true);
 
     if (this.modoNuevoCliente()) {
-      // 1. Crear cliente primero y luego vender
       this.clienteService.crearCliente(this.formCliente()).subscribe({
         next: (nuevoCliente) => this.ejecutarVenta(nuevoCliente.id),
         error: (err) => {
@@ -143,20 +150,21 @@ export class NuevaVenta implements OnInit {
         }
       });
     } else {
-      // 2. Vender con cliente existente
-      if (!this.clienteSeleccionado()) {
-        this.errorGlobal.set('Debe seleccionar un cliente.');
-        this.submitting.set(false);
-        return;
-      }
-      this.ejecutarVenta(this.clienteSeleccionado()!.id);
+      this.ejecutarVenta(this.clienteSeleccionado() ? this.clienteSeleccionado()!.id : null);
     }
   }
 
-  private ejecutarVenta(clienteId: number) {
+  private ejecutarVenta(clienteId: number | null) {
     const payload: VentaRequest = {
       clienteId: clienteId,
       tipoComprobante: this.tipoComprobante(),
+      
+      // Enviamos la data del crédito al backend
+      condicionPago: this.condicionPago(),
+      diasCredito: this.condicionPago() === 'CREDITO' ? this.diasCredito() : null,
+      pagoInicial: this.condicionPago() === 'CREDITO' ? this.pagoInicial() : null,
+      metodoPagoInicial: this.condicionPago() === 'CREDITO' ? this.metodoPagoInicial() : null,
+
       detalles: this.carrito().map(item => ({
         productoId: item.producto.id,
         cantidad: item.cantidad
@@ -170,7 +178,7 @@ export class NuevaVenta implements OnInit {
         this.cerrar();
       },
       error: (err) => {
-        this.errorGlobal.set('Error al registrar la venta. Verifique los datos.');
+        this.errorGlobal.set(err.error?.message || 'Error al registrar la venta. Verifique los datos.');
         this.submitting.set(false);
       }
     });
@@ -183,6 +191,12 @@ export class NuevaVenta implements OnInit {
     this.modoNuevoCliente.set(false);
     this.formCliente.set({ nombreCompleto: '', documentoIdentidad: '', telefono: '', email: '', direccion: '' });
     this.errorGlobal.set('');
+    
+    // Resetear variables de crédito
+    this.condicionPago.set('CONTADO');
+    this.diasCredito.set(15);
+    this.pagoInicial.set(0);
+    this.metodoPagoInicial.set('EFECTIVO');
   }
 
   cerrar() {

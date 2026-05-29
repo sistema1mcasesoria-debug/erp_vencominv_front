@@ -23,6 +23,11 @@ export class NuevaCompra implements OnInit {
   onCerrar = output<void>();
   onGuardadoExitoso = output<void>();
 
+  condicionPago = signal<'CONTADO' | 'CREDITO'>('CONTADO');
+  diasCredito = signal<number>(15);
+  pagoInicial = signal<number>(0);
+  metodoPagoInicial = signal<string>('EFECTIVO');
+
   proveedores = signal<Proveedor[]>([]);
   productos = signal<Producto[]>([]);
 
@@ -93,7 +98,7 @@ export class NuevaCompra implements OnInit {
 
   guardar() {
     if (!this.proveedorSeleccionado() || !this.formComprobante().trim()) {
-      this.errorGlobal.set('El Proveedor y el N° de Comprobante son campos obligatorios.');
+      this.errorGlobal.set('El Proveedor y el N° de Comprobante son obligatorios.');
       return;
     }
     
@@ -103,12 +108,24 @@ export class NuevaCompra implements OnInit {
       return;
     }
 
+    if (this.condicionPago() === 'CREDITO' && this.pagoInicial() > this.totalCompra()) {
+      this.errorGlobal.set('El adelanto inicial no puede ser mayor al total de la compra.');
+      return;
+    }
+
     this.submitting.set(true);
     this.errorGlobal.set('');
 
     const payload: CompraRequest = {
       proveedorId: this.proveedorSeleccionado()!.id,
       comprobante: this.formComprobante().trim().toUpperCase(),
+      
+      // --- ENVIAR DATOS DE CRÉDITO ---
+      condicionPago: this.condicionPago(),
+      diasCredito: this.condicionPago() === 'CREDITO' ? this.diasCredito() : null,
+      pagoInicial: this.condicionPago() === 'CREDITO' ? this.pagoInicial() : null,
+      metodoPagoInicial: this.condicionPago() === 'CREDITO' ? this.metodoPagoInicial() : null,
+
       detalles: validos
     };
 
@@ -116,15 +133,28 @@ export class NuevaCompra implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.onGuardadoExitoso.emit();
+        this.resetearFormulario(); // Limpiar todo tras el éxito
       },
       error: (err) => {
         this.submitting.set(false);
-        this.errorGlobal.set(err.error || 'Error del servidor al procesar la factura de adquisición.');
+        this.errorGlobal.set(err.error || 'Error del servidor al procesar la compra.');
       }
     });
   }
+  resetearFormulario() {
+      this.formComprobante.set('');
+      this.busquedaProveedor.set('');
+      this.proveedorSeleccionado.set(null);
+      this.errorGlobal.set('');
+      this.detalles.set([{ productoId: 0, codigoLote: '', cantidad: 1, costoUnitario: 0, fechaVencimiento: '' }]);
+      this.condicionPago.set('CONTADO');
+      this.diasCredito.set(15);
+      this.pagoInicial.set(0);
+      this.metodoPagoInicial.set('EFECTIVO');
+  }
 
   cerrar() {
+    this.resetearFormulario();
     this.onCerrar.emit();
   }
 }
