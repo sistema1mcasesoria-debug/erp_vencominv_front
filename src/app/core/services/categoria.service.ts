@@ -2,15 +2,16 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Categoria, CategoriaRequest } from '../models/categoria.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategoriaService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8080/api/v1/categorias';
+  
+  private baseUrl = `${environment.apiUrl}/categorias`;
 
-  // Usamos el endpoint de activas que indicaste para listar en el ERP
   obtenerCategoriasActivas(): Observable<Categoria[]> {
     return this.http.get<Categoria[]>(`${this.baseUrl}/activas`);
   }

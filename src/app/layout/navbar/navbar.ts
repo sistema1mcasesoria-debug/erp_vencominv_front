@@ -29,7 +29,7 @@ const ROUTE_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule], // 👈 Importamos RouterModule aquí
+  imports: [CommonModule, RouterModule],
   templateUrl: './navbar.html',
 })
 export class NavbarComponent {

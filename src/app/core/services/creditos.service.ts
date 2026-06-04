@@ -2,6 +2,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+// 👇 1. Importamos el environment
+import { environment } from '../../../environments/environment';
 
 export interface AbonoRequest {
   ventaId: number;
@@ -15,19 +17,17 @@ export interface AbonoRequest {
 })
 export class CreditosService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8080/api/v1/creditos';
 
-  // 1. Obtener todas las deudas
+  private baseUrl = `${environment.apiUrl}/creditos`;
+
   obtenerDeudasPendientes(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/pendientes`);
   }
 
-  // 2. Registrar un pago
   registrarAbono(abono: AbonoRequest): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/abonos`, abono);
   }
 
-  // 3. Ver historial de una venta específica
   obtenerHistorial(ventaId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/ventas/${ventaId}/abonos`);
   }
