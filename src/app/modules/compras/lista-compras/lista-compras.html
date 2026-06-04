@@ -1,26 +1,107 @@
 <div class="p-6 bg-gray-50 dark:bg-gray-950 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-200">
   
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Historial de Compras</h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Monitorea los ingresos de mercadería y facturas de tus proveedores.</p>
-    </div>
-    <button 
-      (click)="abrirNuevaCompra()"
-      class="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-600/20 dark:shadow-blue-600/10">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-      Registrar Compra
-    </button>
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Historial de Compras</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Monitorea los ingresos de mercadería y gestiona las cuentas por pagar a proveedores.</p>
   </div>
 
-  <div *ngIf="errorGlobal()" class="mb-6 flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-600 dark:text-red-400 transition-colors">
+  <div class="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-white/10 mb-6 flex flex-wrap xl:flex-nowrap items-end justify-between gap-4 shadow-sm transition-colors duration-200">
+    
+    <div class="flex flex-wrap items-end gap-3 w-full xl:w-auto">
+      <div>
+        <label class="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">Tipo de Reporte</label>
+        <select 
+          [ngModel]="tipoReporte()" 
+          (ngModelChange)="cambiarFiltroReporte('tipo', $event)"
+          class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 w-full sm:w-auto transition-colors">
+          <option value="compras">Registro de Compras (General)</option>
+          <option value="compras/pendientes">Cuentas por Pagar</option>
+          <option value="compras/pagos">Historial de Pagos</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">Inicio <span class="text-red-500">*</span></label>
+        <input 
+          type="date" 
+          [ngModel]="fechaInicio()" 
+          (ngModelChange)="cambiarFiltroReporte('inicio', $event)"
+          class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">Fin <span class="text-red-500">*</span></label>
+        <input 
+          type="date" 
+          [ngModel]="fechaFin()" 
+          (ngModelChange)="cambiarFiltroReporte('fin', $event)"
+          class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]">
+      </div>
+      <div class="flex gap-2 w-full sm:w-auto">
+        <button 
+          (click)="verDocumentoPdf()" 
+          [disabled]="!fechaInicio() || !fechaFin() || descargando()" 
+          class="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Previsualizar
+        </button>
+        <button 
+          (click)="descargarExcelDirecto()" 
+          [disabled]="!fechaInicio() || !fechaFin() || descargando()" 
+          class="flex-1 sm:flex-none bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50 disabled:cursor-not-allowed font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+      <div class="relative w-full sm:w-64">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          type="text"
+          [ngModel]="terminoBusqueda()"
+          (ngModelChange)="terminoBusqueda.set($event)"
+          placeholder="Buscar factura o proveedor..."
+          class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm"
+        >
+      </div>
+      <button 
+        (click)="abrirNuevaCompra()"
+        class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-600/20 whitespace-nowrap">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+        Registrar Compra
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorGlobal() && !modalAbierto() && !modalPagoAbierto()" class="mb-6 flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-600 dark:text-red-400 transition-colors">
     <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 10v1"/></svg>
     <span>{{ errorGlobal() }}</span>
   </div>
 
-  <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/8 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-200">
+  <div *ngIf="viewerAbierto()" class="mb-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm flex flex-col h-[600px] animate-fade-in transition-colors duration-200 relative">
+    <div class="bg-gray-100 dark:bg-gray-800/80 px-4 py-3 border-b border-gray-200 dark:border-white/10 flex justify-between items-center z-20">
+      <div class="flex items-center gap-2 text-gray-800 dark:text-gray-200 font-bold text-sm">
+        <svg class="w-5 h-5 text-red-600 dark:text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        {{ tituloDocumento() }}
+      </div>
+      <button (click)="cerrarVisor()" class="text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700" title="Cerrar previsualización">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    
+    <div class="flex-1 w-full bg-gray-200 dark:bg-[#525659] relative z-10">
+      <div *ngIf="descargando()" class="absolute inset-0 bg-gray-200/80 dark:bg-[#525659]/80 backdrop-blur-sm flex flex-col items-center justify-center z-30 transition-all">
+        <svg class="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400 mb-3" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+        <span class="text-sm font-bold text-gray-700 dark:text-gray-200 tracking-wider animate-pulse">Actualizando reporte...</span>
+      </div>
+
+      <iframe *ngIf="pdfUrlSegura()" [src]="pdfUrlSegura()" class="w-full h-full border-0 relative z-10"></iframe>
+    </div>
+  </div>
+
+  <div *ngIf="!viewerAbierto()" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/8 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-200 animate-fade-in">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
@@ -28,6 +109,7 @@
             <th class="px-6 py-4">Fecha / Tipo</th>
             <th class="px-6 py-4">Comprobante</th>
             <th class="px-6 py-4">Proveedor</th>
+            <th class="px-6 py-4">DOC / RUC</th>
             <th class="px-6 py-4 text-center">Estado Pago</th>
             <th class="px-6 py-4 text-right">Saldo Pend.</th>
             <th class="px-6 py-4 text-center">Acción</th>
@@ -45,31 +127,33 @@
           <tr *ngIf="!loading() && compras().length === 0">
             <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">No se registran compras previas en esta sucursal.</td>
           </tr>
+
+          <tr *ngIf="!loading() && compras().length > 0 && comprasFiltradas().length === 0">
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+              No se encontraron resultados para "<span class="font-semibold text-gray-700 dark:text-gray-300">{{ terminoBusqueda() }}</span>"
+            </td>
+          </tr>
           
-          <tr *ngFor="let c of compras()" class="hover:bg-gray-50 dark:hover:bg-white/[0.01] transition-colors">
-            
+          <tr *ngFor="let c of comprasFiltradas()" class="hover:bg-gray-50 dark:hover:bg-white/[0.01] transition-colors">
             <td class="px-6 py-4 text-gray-700 dark:text-gray-300 font-medium">
               {{ c.fechaCompra | date:'dd/MM/yyyy' }}
               <span class="block text-[10px] uppercase font-bold mt-0.5" [ngClass]="c.condicionPago === 'CREDITO' ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'">
                 {{ c.condicionPago || 'CONTADO' }}
               </span>
             </td>
-            
             <td class="px-6 py-4 font-mono text-xs text-blue-700 dark:text-blue-300 uppercase tracking-wide">{{ c.comprobante }}</td>
             <td class="px-6 py-4 text-gray-900 dark:text-gray-200 font-semibold">{{ c.proveedorRazonSocial }}</td>
-            
+            <td class="px-6 py-4 text-gray-900 dark:text-gray-200 font-semibold">{{ c.documentoIdentidad }}</td>
             <td class="px-6 py-4 text-center">
               <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold border transition-colors"
                 [ngClass]="c.estadoPago === 'PAGADO' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' : (c.estadoPago === 'PARCIAL' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400' : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400')">
                 {{ c.estadoPago || 'PAGADO' }}
               </span>
             </td>
-
             <td class="px-6 py-4 text-right font-mono font-bold" [ngClass]="c.saldoPendiente > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-500'">
               S/ {{ c.saldoPendiente | number:'1.2-2' }}
               <span class="block text-[10px] text-gray-400 font-normal">Total: S/ {{ c.total | number:'1.2-2' }}</span>
             </td>
-            
             <td class="px-6 py-4 text-center">
               <button *ngIf="c.saldoPendiente > 0" (click)="abrirModalPago(c)" class="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors p-2 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 cursor-pointer" title="Pagar Deuda">
                 <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -78,7 +162,6 @@
               </button>
             </td>
           </tr>
-
         </tbody>
       </table>
     </div>

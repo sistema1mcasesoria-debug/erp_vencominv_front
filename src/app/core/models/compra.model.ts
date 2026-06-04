@@ -14,8 +14,8 @@ export interface CompraRequest {
   condicionPago?: 'CONTADO' | 'CREDITO';
   diasCredito?: number | null;
   pagoInicial?: number | null;
-  metodoPagoInicial?: string | null;
-
+  metodoPagoInicial?: string | null;  
+  igvPorcentaje: number;
   detalles: CompraDetalleRequest[];
 }
 
@@ -26,6 +26,7 @@ export interface CompraResponse {
   empresaId: number;
   proveedorId: number;
   proveedorRazonSocial: string;
+  documentoIdentidad:string;
   usuarioId: number;
   usuarioNombre: string;
   fechaCompra: string;

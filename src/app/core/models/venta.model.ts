@@ -15,6 +15,7 @@ export interface VentaRequest {
   metodoPagoInicial?: string | null;
 
   detalles: VentaDetalleRequest[];
+  igvPorcentaje?: number | null;
 }
 
 // ── DETALLES QUE VIENEN DEL BACKEND (Mapeados del Lote) ──

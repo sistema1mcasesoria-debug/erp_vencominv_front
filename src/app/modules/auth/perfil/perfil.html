@@ -1,0 +1,318 @@
+<div class="min-h-full bg-gray-50 dark:bg-gray-950 p-6 transition-colors duration-200">
+
+  <!-- Encabezado -->
+  <div class="mb-6">
+    <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Mi cuenta</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-500 mt-0.5">Gestiona tu información personal y la de tu empresa</p>
+  </div>
+
+  <div class="max-w-3xl">
+
+    <!-- Tabs -->
+    <div class="flex gap-1 mb-6 bg-gray-100 dark:bg-gray-900 p-1 rounded-xl w-fit border border-gray-200 dark:border-white/5">
+      <button
+        (click)="setTab('perfil')"
+        [class]="activeTab() === 'perfil'
+          ? 'px-5 py-1.5 text-sm font-medium rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/8 transition-all'
+          : 'px-5 py-1.5 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all'"
+      >
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg>
+          Mi perfil
+        </span>
+      </button>
+      <button
+        *ngIf="esAdmin()"
+        (click)="setTab('empresa')"
+        [class]="activeTab() === 'empresa'
+          ? 'px-5 py-1.5 text-sm font-medium rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none border border-gray-200 dark:border-white/8 transition-all'
+          : 'px-5 py-1.5 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all'"
+      >
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="12" height="8" rx="1"/><path d="M5 7V5a3 3 0 016 0v2"/></svg>
+          Mi empresa
+        </span>
+      </button>
+    </div>
+
+    <!-- ══════════════ TAB: PERFIL ══════════════ -->
+    <div *ngIf="activeTab() === 'perfil'" class="space-y-4">
+
+      <!-- Card: Avatar -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/5 p-6">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Foto de perfil</h2>
+
+        <div class="flex items-center gap-5">
+          <!-- Avatar actual -->
+          <div class="relative flex-shrink-0">
+            <div class="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+              <img
+                *ngIf="fotoActual()"
+                [src]="fotoActual()"
+                alt="Foto de perfil"
+                class="w-full h-full object-cover"
+              />
+              <span *ngIf="!fotoActual()" class="text-white text-2xl font-bold">{{ avatarLetra() }}</span>
+            </div>
+            <!-- Indicador de cambio pendiente -->
+            <span
+              *ngIf="archivoFoto()"
+              class="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full border-2 border-white dark:border-gray-900"
+            ></span>
+          </div>
+
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ usuario()?.nombreCompleto }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">{{ usuario()?.rol | titlecase }} · {{ usuario()?.empresaNombre }}</p>
+
+            <div class="flex items-center gap-2 mt-3">
+              <label class="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  class="hidden"
+                  (change)="onFotoSeleccionada($event)"
+                />
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8l5-5 5 5"/></svg>
+                  {{ archivoFoto() ? 'Cambiar archivo' : 'Subir foto' }}
+                </span>
+              </label>
+
+              <button
+                *ngIf="archivoFoto()"
+                (click)="cancelarFoto()"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              >
+                Cancelar
+              </button>
+
+              <button
+                *ngIf="archivoFoto()"
+                (click)="guardarFoto()"
+                [disabled]="guardandoPerfil()"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white transition-colors flex items-center gap-1.5"
+              >
+                <svg *ngIf="guardandoPerfil()" class="w-3 h-3 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-opacity="0.3"/><path d="M8 2a6 6 0 016 6"/></svg>
+                {{ guardandoPerfil() ? 'Subiendo...' : 'Guardar foto' }}
+              </button>
+            </div>
+
+            <p class="text-[11px] text-gray-400 dark:text-gray-600 mt-2">JPG, PNG o WEBP · máx. 2 MB</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Datos personales -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/5 p-6">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Información personal</h2>
+
+        <form [formGroup]="formPerfil" (ngSubmit)="guardarPerfil()" class="space-y-4">
+
+          <!-- Nombre completo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Nombre completo</label>
+            <input
+              formControlName="nombreCompleto"
+              type="text"
+              class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+            />
+          </div>
+
+          <!-- Username (solo lectura) -->
+          <div>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Usuario</label>
+            <input
+              type="text"
+              [value]="usuario()?.username ?? ''"
+              readonly
+              class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-gray-800/50 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+            />
+          </div>
+
+          <!-- Separador contraseña -->
+          <div class="pt-2 border-t border-gray-100 dark:border-white/5">
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-500 mb-3">Cambiar contraseña <span class="font-normal text-gray-400">(opcional)</span></p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1.5">Nueva contraseña</label>
+                <input
+                  formControlName="passwordNuevo"
+                  type="password"
+                  placeholder="Mín. 6 caracteres"
+                  class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1.5">Confirmar contraseña</label>
+                <input
+                  formControlName="passwordConfirm"
+                  type="password"
+                  placeholder="Repite la contraseña"
+                  class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje feedback -->
+          <div
+            *ngIf="mensajePerfil()"
+            [class]="mensajePerfil()!.tipo === 'ok'
+              ? 'flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-400'
+              : 'flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs text-red-700 dark:text-red-400'"
+          >
+            <svg *ngIf="mensajePerfil()!.tipo === 'ok'" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 4"/></svg>
+            <svg *ngIf="mensajePerfil()!.tipo === 'error'" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11v.5"/></svg>
+            {{ mensajePerfil()!.texto }}
+          </div>
+
+          <!-- Botón guardar -->
+          <div class="flex justify-end pt-1">
+            <button
+              type="submit"
+              [disabled]="formPerfil.invalid || guardandoPerfil()"
+              class="flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white transition-colors"
+            >
+              <svg *ngIf="guardandoPerfil()" class="w-4 h-4 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-opacity="0.3"/><path d="M8 2a6 6 0 016 6"/></svg>
+              {{ guardandoPerfil() ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- ══════════════ TAB: EMPRESA ══════════════ -->
+    <div *ngIf="activeTab() === 'empresa'" class="space-y-4">
+
+      <!-- Card: Logo empresa -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/5 p-6">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Logo de la empresa</h2>
+        <p class="text-xs text-gray-400 dark:text-gray-600 mb-5">Este logo aparecerá en documentos, reportes y la pantalla de login.</p>
+
+        <div class="flex items-start gap-6">
+          <!-- Preview logo -->
+          <div class="flex-shrink-0">
+            <div class="w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+              
+              <img
+                *ngIf="logoActual()"
+                [src]="logoActual()"
+                alt="Logo empresa"
+                class="w-full h-full object-contain p-1"
+              />
+              
+              <svg *ngIf="!logoActual()" class="w-8 h-8 text-gray-300 dark:text-gray-700" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="8" width="24" height="18" rx="2"/><circle cx="12" cy="15" r="2.5"/><path d="M4 22l6-5 4 4 5-6 9 7"/></svg>
+            </div>
+            
+            <p *ngIf="archivoLogo()" class="text-[11px] text-center text-amber-500 dark:text-amber-400 mt-1.5">Sin guardar</p>
+          </div>
+
+          <div class="flex-1">
+            <!-- Zona de drop / selección -->
+            <label class="cursor-pointer block">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                class="hidden"
+                (change)="onLogoSeleccionado($event)"
+              />
+              <div class="border-2 border-dashed border-gray-200 dark:border-white/8 rounded-xl p-5 text-center hover:border-indigo-300 dark:hover:border-indigo-500/40 hover:bg-indigo-50/30 dark:hover:bg-indigo-500/5 transition-colors cursor-pointer">
+                <svg class="w-6 h-6 text-gray-400 dark:text-gray-600 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v12M6 10l6-6 6 6"/><path d="M4 20h16"/></svg>
+                <p class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  {{ archivoLogo() ? archivoLogo()!.name : 'Haz clic para seleccionar' }}
+                </p>
+                <p class="text-[11px] text-gray-400 dark:text-gray-600 mt-0.5">JPG, PNG o WEBP · máx. 2 MB</p>
+              </div>
+            </label>
+
+            <!-- Acciones -->
+            <div class="flex gap-2 mt-3" *ngIf="archivoLogo()">
+              <button
+                (click)="cancelarLogo()"
+                class="flex-1 py-2 text-xs font-medium rounded-lg border border-gray-200 dark:border-white/10 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                (click)="guardarLogo()"
+                [disabled]="guardandoLogo()"
+                class="flex-1 py-2 text-xs font-medium rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white transition-colors flex items-center justify-center gap-1.5"
+              >
+                <svg *ngIf="guardandoLogo()" class="w-3 h-3 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-opacity="0.3"/><path d="M8 2a6 6 0 016 6"/></svg>
+                {{ guardandoLogo() ? 'Subiendo...' : 'Guardar logo' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje empresa -->
+        <div
+          *ngIf="mensajeEmpresa()"
+          [class]="mensajeEmpresa()!.tipo === 'ok'
+            ? 'flex items-center gap-2 px-3 py-2.5 mt-4 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-400'
+            : 'flex items-center gap-2 px-3 py-2.5 mt-4 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs text-red-700 dark:text-red-400'"
+        >
+          <svg *ngIf="mensajeEmpresa()!.tipo === 'ok'" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 4"/></svg>
+          <svg *ngIf="mensajeEmpresa()!.tipo === 'error'" class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 11v.5"/></svg>
+          {{ mensajeEmpresa()!.texto }}
+        </div>
+      </div>
+
+      <!-- Card: Info empresa (solo lectura) -->
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/5 p-6">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Datos de la empresa</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-gray-500 dark:text-gray-500 mb-1">Razón social</label>
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg border border-gray-200 dark:border-white/5">
+              {{ usuario()?.empresaNombre ?? '—' }}
+            </p>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 dark:text-gray-500 mb-1">Plan de suscripción</label>
+            <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg border border-gray-200 dark:border-white/5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span>
+              <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Básico</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-gray-400 dark:text-gray-600 mt-4 flex items-center gap-1.5">
+          <svg class="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M6 5v4M6 3.5v.5"/></svg>
+          Para modificar los datos de la empresa contacta al soporte de AmTech.
+        </p>
+      </div>
+      <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-white/5 p-6 mt-4">
+      <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Configuración Fiscal</h2>
+      <p class="text-xs text-gray-400 dark:text-gray-600 mb-4">Define el porcentaje de impuesto (IGV/IVA) que aplica a tus ventas.</p>
+
+      <div class="flex items-end gap-3 max-w-sm">
+        <div class="flex-1">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Porcentaje de IGV (%)</label>
+          <input
+            #igvInput
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            [value]="igvValor()"
+            class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors"
+          />
+        </div>
+        
+        <button
+          (click)="guardarIgv(igvInput.value)"
+          [disabled]="guardandoIgv()"
+          class="px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white transition-colors flex items-center gap-1.5 h-[38px]"
+        >
+          <svg *ngIf="guardandoIgv()" class="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-opacity="0.3"/><path d="M8 2a6 6 0 016 6"/></svg>
+          {{ guardandoIgv() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>

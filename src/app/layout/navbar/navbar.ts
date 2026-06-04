@@ -1,6 +1,6 @@
 import { Component, signal, inject, HostListener, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterModule } from '@angular/router'; // 👈 Se agregó RouterModule
 import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/auth/auth.service';
@@ -12,6 +12,7 @@ interface Breadcrumb {
 
 const ROUTE_LABELS: Record<string, string> = {
   dashboard:   'Dashboard',
+  perfil:      'Mi Perfil', 
   modules:     'Módulos',
   inventario:  'Inventario',
   compras:     'Compras',
@@ -28,7 +29,7 @@ const ROUTE_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule], // 👈 Importamos RouterModule aquí
   templateUrl: './navbar.html',
 })
 export class NavbarComponent {
@@ -42,6 +43,8 @@ export class NavbarComponent {
   userRol       = computed(() => this.authService.currentUser()?.rol ?? '');
   empresaNombre = computed(() => this.authService.currentUser()?.empresaNombre ?? '');
   avatarLetter  = computed(() => this.usuarioNombre().charAt(0).toUpperCase());
+  
+  usuarioFoto   = computed(() => this.authService.currentUser()?.fotoUrl ?? null);
 
   breadcrumbs = toSignal(
     this.router.events.pipe(

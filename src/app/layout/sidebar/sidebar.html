@@ -5,7 +5,6 @@
 >
 
   <div class="flex items-center gap-3 px-4 py-5 border-b border-gray-200 dark:border-white/5">
-    
     <img 
       src="LogoMCweb.png" 
       alt="Logo de la Empresa" 
@@ -28,6 +27,7 @@
     
     <ng-container *ngFor="let item of visibleItems()">
       
+      <!-- Ítem sin hijos -->
       <a
         *ngIf="!item.children"
         (click)="cerrarSubmenus()" 
@@ -39,30 +39,64 @@
       >
         <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
           <ng-container [ngSwitch]="item.icon">
+
+            <!-- Dashboard -->
             <svg *ngSwitchCase="'grid'" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M5 3h4v4H5zM11 3h4v4h-4zM5 11h4v4H5zM11 11h4v4h-4z"/>
             </svg>
+
+            <!-- Inventario -->
             <svg *ngSwitchCase="'package'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M16 8l-6-4-6 4v8l6 4 6-4V8z"/><path d="M10 4v12M4 8l6 4 6-4"/>
+              <path d="M16 8l-6-4-6 4v8l6 4 6-4V8z"/>
+              <path d="M10 4v12M4 8l6 4 6-4"/>
             </svg>
+
+            <!-- Compras -->
             <svg *ngSwitchCase="'shopping-cart'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M3 3h2l.4 2M7 13h10l1.4-7H5.4M7 13l-1.4-7M7 13a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z"/>
             </svg>
+
+            <!-- Pedidos / Kardex -->
             <svg *ngSwitchCase="'clipboard'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="5" y="3" width="10" height="14" rx="1"/><path d="M8 3v1h4V3M7 9h6M7 12h4"/>
+              <rect x="5" y="3" width="10" height="14" rx="1"/>
+              <path d="M8 3v1h4V3M7 9h6M7 12h4"/>
             </svg>
+
+            <!-- Ventas -->
             <svg *ngSwitchCase="'receipt'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 3v14l2-1.5 2 1.5 2-1.5 2 1.5 2-1.5V3l-2 1.5L11 3 9 4.5 7 3 5 4.5z"/><path d="M8 8h4M8 11h4"/>
+              <path d="M5 3v14l2-1.5 2 1.5 2-1.5 2 1.5 2-1.5V3l-2 1.5L11 3 9 4.5 7 3 5 4.5z"/>
+              <path d="M8 8h4M8 11h4"/>
             </svg>
+
+            <!-- Clientes -->
+            <svg *ngSwitchCase="'users'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="7" cy="6" r="3"/>
+              <path d="M1 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+              <path d="M14 4a3 3 0 010 6"/>
+              <path d="M19 17c0-2.8-1.8-5.1-4-5.8"/>
+            </svg>
+
+            <!-- Créditos -->
+            <svg *ngSwitchCase="'bar-chart'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2"  y="10" width="3" height="7" rx="0.5"/>
+              <rect x="8"  y="6"  width="3" height="11" rx="0.5"/>
+              <rect x="14" y="3"  width="3" height="14" rx="0.5"/>
+            </svg>
+
+            <!-- Usuarios -->
             <svg *ngSwitchCase="'user-cog'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="8" cy="7" r="3"/><path d="M2 17c0-3.3 2.7-6 6-6"/>
-              <circle cx="16" cy="15" r="2"/><path d="M16 11v1M16 18v1M13 12l.7.7M19 18l-.7-.7M11 15h1M20 15h1M13 18l.7-.7M19 12l-.7.7"/>
+              <circle cx="8" cy="7" r="3"/>
+              <path d="M2 17c0-3.3 2.7-6 6-6"/>
+              <circle cx="16" cy="15" r="2"/>
+              <path d="M16 11v1M16 18v1M13 12l.7.7M19 18l-.7-.7M11 15h1M20 15h1M13 18l.7-.7M19 12l-.7.7"/>
             </svg>
+
           </ng-container>
         </span>
         <span *ngIf="!collapsed()" class="text-sm font-medium truncate">{{ item.label }}</span>
       </a>
 
+      <!-- Ítem con hijos (submenú) -->
       <div *ngIf="item.children" class="flex flex-col">
         <button
           (click)="toggleSubmenu(item)"
@@ -73,9 +107,37 @@
         >
           <div class="flex items-center gap-3">
             <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-              <svg *ngIf="item.icon === 'tag'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M3 3h7l7 7-7 7-7-7V3z"/><circle cx="7" cy="7" r="1"/>
-              </svg>
+              <ng-container [ngSwitch]="item.icon">
+
+                <!-- Catálogos -->
+                <svg *ngSwitchCase="'tag'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 3h7l7 7-7 7-7-7V3z"/>
+                  <circle cx="7" cy="7" r="1"/>
+                </svg>
+                <!-- Inventario -->
+                <svg *ngSwitchCase="'package'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M16 8l-6-4-6 4v8l6 4 6-4V8z"/>
+                  <path d="M10 4v12M4 8l6 4 6-4"/>
+                </svg>
+                <svg *ngSwitchCase="'cash-register'" class="w-5 h-5" viewBox="0 0 68 66" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="4"  y="0"  width="60" height="16" rx="2"/>
+                  <rect x="0"  y="20" width="68" height="42" rx="3"/>
+                  <rect x="8"  y="50" width="52" height="12" rx="1"/>
+                  <rect x="8"  y="26" width="10" height="7"  rx="1"/>
+                  <rect x="22" y="26" width="10" height="7"  rx="1"/>
+                  <rect x="36" y="26" width="10" height="7"  rx="1"/>
+                  <rect x="50" y="26" width="10" height="7"  rx="1"/>
+                  <rect x="8"  y="38" width="10" height="7"  rx="1"/>
+                  <rect x="22" y="38" width="10" height="7"  rx="1"/>
+                  <rect x="36" y="38" width="24" height="7"  rx="1"/>
+                  <line x1="28" y1="56" x2="40" y2="56" stroke-width="2"/>
+                </svg>  
+                <!-- Pedidos / Kardex -->
+                <svg *ngSwitchCase="'clipboard'" class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="5" y="3" width="10" height="14" rx="1"/>
+                  <path d="M8 3v1h4V3M7 9h6M7 12h4"/>
+                </svg>
+              </ng-container>
             </span>
             <span *ngIf="!collapsed()" class="text-sm font-medium truncate">{{ item.label }}</span>
           </div>

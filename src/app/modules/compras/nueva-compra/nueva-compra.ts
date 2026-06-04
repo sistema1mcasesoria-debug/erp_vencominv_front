@@ -27,6 +27,9 @@ export class NuevaCompra implements OnInit {
   diasCredito = signal<number>(15);
   pagoInicial = signal<number>(0);
   metodoPagoInicial = signal<string>('EFECTIVO');
+  
+  // 👇 NUEVA SEÑAL PARA EL IGV (Por defecto 18%)
+  igvSeleccionado = signal<number>(18);
 
   proveedores = signal<Proveedor[]>([]);
   productos = signal<Producto[]>([]);
@@ -52,11 +55,7 @@ export class NuevaCompra implements OnInit {
   constructor() {
     effect(() => {
       if (this.isOpen()) {
-        this.formComprobante.set('');
-        this.busquedaProveedor.set('');
-        this.proveedorSeleccionado.set(null);
-        this.errorGlobal.set('');
-        this.detalles.set([{ productoId: 0, codigoLote: '', cantidad: 1, costoUnitario: 0, fechaVencimiento: '' }]);
+        this.resetearFormulario(); // Usamos resetearFormulario para limpiar todo de golpe
       }
     });
   }
@@ -119,12 +118,13 @@ export class NuevaCompra implements OnInit {
     const payload: CompraRequest = {
       proveedorId: this.proveedorSeleccionado()!.id,
       comprobante: this.formComprobante().trim().toUpperCase(),
-      
-      // --- ENVIAR DATOS DE CRÉDITO ---
       condicionPago: this.condicionPago(),
       diasCredito: this.condicionPago() === 'CREDITO' ? this.diasCredito() : null,
       pagoInicial: this.condicionPago() === 'CREDITO' ? this.pagoInicial() : null,
       metodoPagoInicial: this.condicionPago() === 'CREDITO' ? this.metodoPagoInicial() : null,
+      
+      // 👇 AÑADIMOS EL IGV SELECCIONADO AL PAYLOAD
+      igvPorcentaje: this.igvSeleccionado(),
 
       detalles: validos
     };
@@ -133,7 +133,7 @@ export class NuevaCompra implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.onGuardadoExitoso.emit();
-        this.resetearFormulario(); // Limpiar todo tras el éxito
+        this.resetearFormulario(); 
       },
       error: (err) => {
         this.submitting.set(false);
@@ -141,6 +141,7 @@ export class NuevaCompra implements OnInit {
       }
     });
   }
+
   resetearFormulario() {
       this.formComprobante.set('');
       this.busquedaProveedor.set('');
@@ -151,6 +152,8 @@ export class NuevaCompra implements OnInit {
       this.diasCredito.set(15);
       this.pagoInicial.set(0);
       this.metodoPagoInicial.set('EFECTIVO');
+      // 👇 RESETEAMOS EL IGV A 18% POR DEFECTO
+      this.igvSeleccionado.set(18);
   }
 
   cerrar() {

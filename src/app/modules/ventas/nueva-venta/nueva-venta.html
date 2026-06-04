@@ -189,6 +189,21 @@
             </p>
           </div>
         </div>
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-white/10 shrink-0 transition-colors">
+          <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">Impuesto (IGV)</label>
+          <select 
+            [ngModel]="igvSeleccionado()" 
+            (ngModelChange)="igvSeleccionado.set($event)"
+            class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-colors shadow-sm dark:shadow-none appearance-none">
+            <option [ngValue]="18">IGV 18% (General)</option>
+            <option [ngValue]="10">IGV 10% (Especial / Restaurantes)</option>
+            <option [ngValue]="0">IGV 0% (Inafecto / Exonerado)</option>
+          </select>
+        </div>
+        <div class="mt-auto pt-4 shrink-0 transition-colors"> <div class="flex justify-between items-end mb-6">
+            <span class="text-gray-500 dark:text-gray-400 font-bold text-xs uppercase tracking-wider">TOTAL A COBRAR</span>
+            <span class="text-4xl font-bold font-mono text-emerald-600 dark:text-emerald-400">S/ {{ totalVenta() | number:'1.2-2' }}</span>
+          </div>
 
         <div class="mt-auto pt-6 border-t border-gray-200 dark:border-white/10 shrink-0 transition-colors">
           <div class="flex justify-between items-end mb-6">

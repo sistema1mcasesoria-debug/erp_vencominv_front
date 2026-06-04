@@ -1,6 +1,7 @@
 // src/app/features/usuarios/lista-usuarios/lista-usuarios.component.ts
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core'; // <-- Se agregó 'computed'
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // <-- NECESARIO PARA EL INPUT
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { Usuario, UsuarioRequest } from '../../../core/models/usuario.model';
 import { Rol } from '../../../core/models/rol.model';
@@ -9,7 +10,7 @@ import { FormUsuarios } from '../form-usuarios/form-usuarios';
 @Component({
   selector: 'app-lista-usuarios',
   standalone: true,
-  imports: [CommonModule, FormUsuarios], // LO DECLARAMOS AQUÍ
+  imports: [CommonModule, FormsModule, FormUsuarios], // <-- Agregamos FormsModule aquí
   templateUrl: './lista-usuarios.html',
 })
 export class ListaUsuarios implements OnInit {
@@ -19,6 +20,20 @@ export class ListaUsuarios implements OnInit {
   roles = signal<Rol[]>([]);
   loading = signal(false);
   errorGlobal = signal('');
+
+  // --- NUEVO: ESTADOS PARA EL FILTRO ---
+  busqueda = signal('');
+  
+  // Computamos la lista filtrada automáticamente cuando 'busqueda' o 'usuarios' cambien
+  usuariosFiltrados = computed(() => {
+    const termino = this.busqueda().toLowerCase().trim();
+    if (!termino) return this.usuarios();
+    
+    return this.usuarios().filter(u => 
+      u.nombreCompleto.toLowerCase().includes(termino) ||
+      u.username.toLowerCase().includes(termino)
+    );
+  });
 
   // Estados para controlar el comportamiento del formulario hijo
   modalAbierto = signal(false);
@@ -58,12 +73,12 @@ export class ListaUsuarios implements OnInit {
   }
 
   abrirModalCrear() {
-    this.usuarioSeleccionado.set(null); // Creación = null
+    this.usuarioSeleccionado.set(null); 
     this.modalAbierto.set(true);
   }
 
   abrirModalEditar(usuario: Usuario) {
-    this.usuarioSeleccionado.set(usuario); // Edición = cargamos datos
+    this.usuarioSeleccionado.set(usuario); 
     this.modalAbierto.set(true);
   }
 
@@ -74,7 +89,7 @@ export class ListaUsuarios implements OnInit {
 
   manejarGuardadoExitoso() {
     this.cerrarModal();
-    this.obtenerListaUsuarios(); // Refresca la tabla automáticamente
+    this.obtenerListaUsuarios(); 
   }
 
   cambiarEstado(usuario: Usuario) {

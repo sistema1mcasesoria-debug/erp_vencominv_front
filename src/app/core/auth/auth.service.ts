@@ -15,11 +15,14 @@ export interface LoginResponse {
 
 export interface CurrentUser {
   id: number;
-  empresaId: 1;
+  empresaId: number;
   empresaNombre: string;
   username: string;
   nombreCompleto: string;
   rol: 'ADMINISTRADOR' | 'CAJERO' | 'ALMACENERO' | 'EMBALADOR';
+  fotoUrl?: string;
+  logoUrl?: string; // 👈 1. Añadido aquí
+  igvPorcentaje?: number;
 }
 
 // ── Helpers JWT ────────────────────────────────────────────
@@ -28,12 +31,16 @@ function decodeJwt(token: string): CurrentUser | null {
     const payload = token.split('.')[1];
     const decoded = JSON.parse(atob(payload));
     return {
-      id:            decoded.id,
-      empresaId:     decoded.empresa_id,
-      empresaNombre: decoded.empresa_nombre ?? '',
-      username:      decoded.username,
+      id:             decoded.id,
+      empresaId:      decoded.empresa_id,
+      empresaNombre:  decoded.empresa_nombre ?? '',
+      username:       decoded.username,
       nombreCompleto: decoded.nombre_completo ?? decoded.username,
-      rol:           decoded.rol,
+      rol:            decoded.rol,
+      fotoUrl:        decoded.foto_url ?? '',
+      logoUrl:        decoded.logo_url ?? '',
+      // 👇 AÑADE ESTA LÍNEA (manejando ambos formatos por si acaso)
+      igvPorcentaje:  decoded.igvPorcentaje ?? decoded.igv_porcentaje ?? 18, 
     };
   } catch {
     return null;
@@ -48,11 +55,24 @@ export class AuthService {
 
   private readonly TOKEN_KEY = 'erp_token';
 
-  // Signal con el usuario actual — nunca es unknown
   currentUser = signal<CurrentUser | null>(this.loadUserFromStorage());
 
   isLoggedIn  = computed(() => this.currentUser() !== null);
   empresaId   = computed(() => this.currentUser()?.empresaId ?? null);
+
+  updateCurrentUserState(datosActualizados: { nombreCompleto?: string, fotoUrl?: string, logoUrl?: string, igvPorcentaje?: number }) {
+    const usuarioActual = this.currentUser();
+    if (usuarioActual) {
+      this.currentUser.set({
+        ...usuarioActual,
+        nombreCompleto: datosActualizados.nombreCompleto ?? usuarioActual.nombreCompleto,
+        fotoUrl: datosActualizados.fotoUrl ?? usuarioActual.fotoUrl,
+        logoUrl: datosActualizados.logoUrl ?? usuarioActual.logoUrl,
+        // 👇 2. Asigna el nuevo valor aquí
+        igvPorcentaje: datosActualizados.igvPorcentaje ?? usuarioActual.igvPorcentaje
+      });
+    }
+  }
 
   // ── Login ──────────────────────────────────────────────
   login(credentials: LoginRequest) {
@@ -78,7 +98,6 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  // ── Inicializa desde localStorage al recargar ──────────
   private loadUserFromStorage(): CurrentUser | null {
     const token = localStorage.getItem(this.TOKEN_KEY);
     return token ? decodeJwt(token) : null;

@@ -8,17 +8,29 @@ export class ReportesService {
   private http = inject(HttpClient);
   private baseUrl = 'http://localhost:8080/api/v1/reportes';
 
-  descargarExcel(tipo: string, inicio: string, fin: string): Observable<Blob> {
+  // 1. Mantiene la descarga de EXCEL
+  descargarExcel(tipo: string, inicio: string, fin: string, productoId?: number | string): Observable<Blob> {
     let params = new HttpParams();
-    
-    // Solo agregamos las fechas a la URL si el usuario las seleccionó
     if (inicio) params = params.set('inicio', inicio);
     if (fin) params = params.set('fin', fin);
+    if (productoId && productoId !== 'TODOS') params = params.set('productoId', productoId.toString());
 
-    // Llamamos a: /api/v1/reportes/{tipo}/excel?inicio=...&fin=...
     return this.http.get(`${this.baseUrl}/${tipo}/excel`, {
       params: params,
-      responseType: 'blob' // 🔥 VITAL: Le dice a Angular que es un archivo, no un JSON
+      responseType: 'blob' 
+    });
+  }
+
+  // 2. NUEVO: Llama al backend para obtener el PDF
+  descargarPdf(tipo: string, inicio: string, fin: string, productoId?: number | string): Observable<Blob> {
+    let params = new HttpParams();
+    if (inicio) params = params.set('inicio', inicio);
+    if (fin) params = params.set('fin', fin);
+    if (productoId && productoId !== 'TODOS') params = params.set('productoId', productoId.toString());
+
+    return this.http.get(`${this.baseUrl}/${tipo}/pdf`, {
+      params: params,
+      responseType: 'blob' 
     });
   }
 }

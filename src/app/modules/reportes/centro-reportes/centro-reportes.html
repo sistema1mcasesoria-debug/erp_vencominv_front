@@ -2,7 +2,7 @@
   
   <div class="mb-8">
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Centro de Reportes Financieros</h2>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Exporta la data contable, deudas y auditoría en formato Excel.</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Visualiza reportes en PDF o descarga la data contable en Excel.</p>
   </div>
 
   <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 mb-6 flex flex-wrap gap-4 items-end shadow-sm dark:shadow-none transition-colors duration-200">
@@ -17,109 +17,118 @@
   </div>
 
   <div class="flex overflow-x-auto gap-2 mb-6 pb-2 border-b border-gray-200 dark:border-gray-800 custom-scrollbar">
-    <button (click)="cambiarFiltro('TODOS')" [ngClass]="filtroActivo() === 'TODOS' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">
-      Todos los Reportes
-    </button>
-    <button (click)="cambiarFiltro('VENTAS')" [ngClass]="filtroActivo() === 'VENTAS' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">
-      Ventas y Cobranzas
-    </button>
-    <button (click)="cambiarFiltro('COMPRAS')" [ngClass]="filtroActivo() === 'COMPRAS' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">
-      Compras y Pagos
-    </button>
-    <button (click)="cambiarFiltro('INVENTARIO')" [ngClass]="filtroActivo() === 'INVENTARIO' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">
-      Inventario y Auditoría
-    </button>
+    <button (click)="cambiarFiltro('TODOS')" [ngClass]="filtroActivo() === 'TODOS' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">Todos los Reportes</button>
+    <button (click)="cambiarFiltro('VENTAS')" [ngClass]="filtroActivo() === 'VENTAS' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">Ventas y Cobranzas</button>
+    <button (click)="cambiarFiltro('COMPRAS')" [ngClass]="filtroActivo() === 'COMPRAS' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">Compras y Pagos</button>
+    <button (click)="cambiarFiltro('INVENTARIO')" [ngClass]="filtroActivo() === 'INVENTARIO' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'" class="px-5 py-2 rounded-xl text-sm font-bold transition-colors whitespace-nowrap shadow-sm">Inventario y Auditoría</button>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
       <div>
         <h3 class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mb-2">Registro de Ventas</h3>
-        <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Exporta el detalle de facturación, comprobantes e IGV cobrado en el rango de fechas seleccionado.</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Detalle de facturación, comprobantes e IGV cobrado.</p>
       </div>
-      <button (click)="descargarReporte('ventas')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        Descargar Excel
-      </button>
+      <div class="flex gap-2">
+        <button (click)="verDocumentoPdf('ventas', 'Registro de Ventas')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+        <button (click)="descargarExcelDirecto('ventas')" [disabled]="descargando" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+      </div>
     </div>
 
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
         <div>
             <h3 class="text-lg font-bold text-blue-600 dark:text-blue-400 mb-2">Directorio de Clientes</h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Descarga el listado completo de tus clientes, incluyendo documentos, contactos y direcciones registradas.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Listado completo de tus clientes registrados en el sistema.</p>
         </div>
-        <button (click)="descargarReporte('clientes')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Descargar Excel
-        </button>
+        <div class="flex gap-2">
+            <button (click)="verDocumentoPdf('clientes', 'Directorio de Clientes')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+            <button (click)="descargarExcelDirecto('clientes')" [disabled]="descargando" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+        </div>
     </div>
 
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
         <div>
             <h3 class="text-lg font-bold text-rose-600 dark:text-rose-400 mb-2">Cuentas por Cobrar</h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Exporta el listado de facturas a crédito pendientes de pago, con saldos de clientes y fechas de vencimiento.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Listado de facturas a crédito pendientes de pago y morosos.</p>
         </div>
-        <button (click)="descargarReporte('creditos/pendientes')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Descargar Excel
-        </button>
+        <div class="flex gap-2">
+            <button (click)="verDocumentoPdf('creditos/pendientes', 'Cuentas por Cobrar')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+            <button (click)="descargarExcelDirecto('creditos/pendientes')" [disabled]="descargando" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+        </div>
     </div>
 
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'VENTAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
         <div>
             <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mb-2">Historial de Cobros</h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Descarga el registro histórico de todos los pagos fraccionados y adelantos registrados de tus clientes.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Registro histórico de pagos fraccionados y adelantos.</p>
         </div>
-        <button (click)="descargarReporte('creditos/abonos')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Descargar Excel
-        </button>
+        <div class="flex gap-2">
+            <button (click)="verDocumentoPdf('creditos/abonos', 'Historial de Cobros')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+            <button (click)="descargarExcelDirecto('creditos/abonos')" [disabled]="descargando" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+        </div>
     </div>
 
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'COMPRAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'COMPRAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
         <div>
-            <h3 class="text-lg font-bold text-teal-600 dark:text-teal-400 mb-2">Directorio de Proveedores</h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Descarga el listado completo de tus proveedores registrados, incluyendo contacto y datos fiscales.</p>
+            <h3 class="text-lg font-bold text-teal-600 dark:text-teal-400 mb-2">Directorio Proveedores</h3>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Listado completo de tus proveedores y datos fiscales.</p>
         </div>
-        <button (click)="descargarReporte('proveedores')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Descargar Excel
-        </button>
+        <div class="flex gap-2">
+            <button (click)="verDocumentoPdf('proveedores', 'Directorio de Proveedores')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+            <button (click)="descargarExcelDirecto('proveedores')" [disabled]="descargando" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+        </div>
     </div>
 
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'COMPRAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'COMPRAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
         <div>
             <h3 class="text-lg font-bold text-orange-600 dark:text-orange-400 mb-2">Cuentas por Pagar</h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Listado de las facturas de proveedores que tienes pendientes de pago, con saldos y estado.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Facturas de proveedores pendientes de pago.</p>
         </div>
-        <button (click)="descargarReporte('compras/pendientes')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Descargar Excel
-        </button>
+        <div class="flex gap-2">
+            <button (click)="verDocumentoPdf('compras/pendientes', 'Cuentas por Pagar')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+            <button (click)="descargarExcelDirecto('compras/pendientes')" [disabled]="descargando" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+        </div>
     </div>
 
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'COMPRAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'COMPRAS'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
         <div>
             <h3 class="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">Historial de Pagos</h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Registro histórico de todos los abonos y liquidaciones realizadas a tus diferentes proveedores.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Registro histórico de abonos y liquidaciones a proveedores.</p>
         </div>
-        <button (click)="descargarReporte('compras/pagos')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Descargar Excel
-        </button>
+        <div class="flex gap-2">
+            <button (click)="verDocumentoPdf('compras/pagos', 'Historial de Pagos')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+            <button (click)="descargarExcelDirecto('compras/pagos')" [disabled]="descargando" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+        </div>
     </div>
 
-    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'INVENTARIO'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-lg flex flex-col justify-between transition-colors duration-200 animate-fade-in">
+    <div *ngIf="filtroActivo() === 'TODOS' || filtroActivo() === 'INVENTARIO'" class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm flex flex-col justify-between">
       <div>
         <h3 class="text-lg font-bold text-amber-600 dark:text-amber-400 mb-2">Auditoría Kardex</h3>
-        <p class="text-xs text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">Historial de entradas, salidas y ajustes de inventario para control de mermas y cuadre físico.</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mb-6">Historial de entradas, salidas y ajustes de inventario.</p>
       </div>
-      <button (click)="descargarReporte('kardex')" [disabled]="descargando" class="w-full bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        Descargar Excel
-      </button>
+      <div class="flex gap-2">
+        <button (click)="verDocumentoPdf('kardex', 'Auditoría Kardex')" [disabled]="descargando" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Ver PDF</button>
+        <button (click)="descargarExcelDirecto('kardex')" [disabled]="descargando" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel</button>
+      </div>
     </div>
 
   </div>
+</div>
+
+<div *ngIf="viewerAbierto()" class="fixed inset-0 z-50 bg-black/80 flex flex-col animate-fade-in">
+  
+  <header class="h-14 bg-[#323639] text-white flex items-center justify-between px-4 shadow-lg border-b border-black">
+    <div class="flex items-center gap-3">
+      <span class="text-sm font-semibold tracking-wide">{{ tituloDocumento() }}</span>
+    </div>
+
+    <button (click)="cerrarVisor()" title="Cerrar visor" class="p-2 hover:bg-red-500 rounded-full transition-all">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </header>
+
+  <main class="flex-1 bg-[#525659] w-full h-full flex justify-center">
+    <iframe *ngIf="pdfUrlSegura()" [src]="pdfUrlSegura()" class="w-full h-full border-0"></iframe>
+  </main>
 </div>

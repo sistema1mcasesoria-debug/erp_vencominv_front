@@ -1,8 +1,9 @@
-// src/app/features/catalogos/proveedores/proveedores.component.ts
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ProveedorService } from '../../../core/services/proveedor.service';
+import { ReportesService } from '../../../core/services/reportes.service';
 import { Proveedor, ProveedorRequest } from '../../../core/models/proveedor.model';
 
 @Component({
@@ -13,13 +14,34 @@ import { Proveedor, ProveedorRequest } from '../../../core/models/proveedor.mode
 })
 export class Proveedores implements OnInit {
   private proveedorService = inject(ProveedorService);
+  private reportesService = inject(ReportesService);
+  private sanitizer = inject(DomSanitizer);
 
-  // Estados de la tabla
   proveedores = signal<Proveedor[]>([]);
   loading = signal(false);
   errorGlobal = signal('');
 
-  // Estados del Modal
+  terminoBusqueda = signal('');
+  
+  proveedoresFiltrados = computed(() => {
+    const termino = this.terminoBusqueda().toLowerCase().trim();
+    if (!termino) {
+      return this.proveedores();
+    }
+    return this.proveedores().filter(p => 
+      p.razonSocial.toLowerCase().includes(termino) || 
+      p.documentoIdentidad.toLowerCase().includes(termino)
+    );
+  });
+
+  fechaInicio = signal('');
+  fechaFin = signal('');
+  descargando = signal(false);
+  
+  viewerAbierto = signal<boolean>(false);
+  tituloDocumento = signal<string>('');
+  pdfUrlSegura = signal<SafeResourceUrl | null>(null);
+
   isOpenModal = signal(false);
   isEditMode = signal(false);
   proveedorIdSeleccionado = signal<number | null>(null);
@@ -27,7 +49,6 @@ export class Proveedores implements OnInit {
   errorModal = signal('');
   buscandoRuc = signal(false);
 
-  // Propiedades del formulario (Signals)
   formRazonSocial = signal('');
   formDocumento = signal('');
   formTelefono = signal('');
@@ -52,6 +73,57 @@ export class Proveedores implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  verDocumentoPdf() {
+    if (!this.fechaInicio() || !this.fechaFin()) return;
+
+    this.descargando.set(true);
+    this.tituloDocumento.set('Directorio de Proveedores');
+
+    this.reportesService.descargarPdf('proveedores', this.fechaInicio(), this.fechaFin()).subscribe({
+      next: (blob) => {
+        const objectUrl = window.URL.createObjectURL(blob);
+        this.pdfUrlSegura.set(this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl));
+        this.viewerAbierto.set(true);
+        this.descargando.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar el PDF:', err);
+        this.errorGlobal.set('Error al generar el PDF de proveedores.');
+        this.descargando.set(false);
+      }
+    });
+  }
+
+  descargarExcelDirecto() {
+    if (!this.fechaInicio() || !this.fechaFin()) return;
+
+    this.descargando.set(true);
+
+    this.reportesService.descargarExcel('proveedores', this.fechaInicio(), this.fechaFin()).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte_PROVEEDORES.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.descargando.set(false);
+      },
+      error: (err) => {
+        console.error('Error al descargar el Excel:', err);
+        this.errorGlobal.set('Error al descargar el Excel de proveedores.');
+        this.descargando.set(false);
+      }
+    });
+  }
+
+  cerrarVisor() {
+    this.viewerAbierto.set(false);
+    this.pdfUrlSegura.set(null);
   }
 
   abrirModalCrear() {
@@ -84,11 +156,9 @@ export class Proveedores implements OnInit {
     this.isOpenModal.set(false);
   }
 
-  // --- LÓGICA SUNAT CORREGIDA ---
   buscarEnSunat() {
     const doc = this.formDocumento().trim();
     
-    // SUNAT opera con RUC (11 dígitos). Si es un DNI (8 dígitos), dejamos que lo escriban a mano.
     if (!doc || doc.length !== 11) {
       this.errorModal.set('La consulta automatizada requiere un número de RUC válido (11 dígitos).');
       return;
@@ -100,14 +170,11 @@ export class Proveedores implements OnInit {
     this.proveedorService.consultarRucSunat(doc).subscribe({
       next: (res: any) => {
         this.buscandoRuc.set(false);
-        
-        // Mapeo elástico e inteligente para tolerar cualquier estructura del DTO
         const razonSocialObtenida = res?.razonSocial || res?.razon_social;
         const estadoObtenido = res?.estado;
 
         if (razonSocialObtenida) {
           this.formRazonSocial.set(razonSocialObtenida);
-          
           if (estadoObtenido && estadoObtenido !== 'ACTIVO') {
             this.errorModal.set(`Aviso: El contribuyente se encuentra en estado ${estadoObtenido}.`);
           }

@@ -55,7 +55,7 @@
             <span>S/ {{ venta()!.subtotalSinImpuesto | number:'1.2-2' }}</span>
           </div>
           <div class="flex justify-between text-gray-600">
-            <span>I.G.V. (18%):</span>
+            <span>I.G.V. ({{ porcentajeIgv() }}%):</span>
             <span>S/ {{ venta()!.impuestoTotal | number:'1.2-2' }}</span>
           </div>
           <div class="flex justify-between text-base font-bold pt-1">

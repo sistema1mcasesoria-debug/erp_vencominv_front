@@ -24,8 +24,9 @@
         class="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
         aria-label="Perfil de usuario"
       >
-        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-          {{ avatarLetter() }}
+        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden">
+          <img *ngIf="usuarioFoto()" [src]="usuarioFoto()" alt="Foto" class="w-full h-full object-cover">
+          <span *ngIf="!usuarioFoto()">{{ avatarLetter() }}</span>
         </div>
         <div class="hidden sm:flex flex-col items-start leading-none">
           <span class="text-xs font-semibold text-gray-900 dark:text-gray-200">{{ usuarioNombre() }}</span>
@@ -47,7 +48,11 @@
 
         <ul class="py-1">
           <li>
-            <button class="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200 transition-colors text-left">
+            <button 
+              routerLink="/perfil"
+              (click)="profileOpen.set(false)"
+              class="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200 transition-colors text-left"
+            >
               <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg>
               Mi perfil
             </button>

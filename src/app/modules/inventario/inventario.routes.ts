@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 export const INVENTARIO_ROUTES: Routes = [
   {
-    path: '',
+    path: 'lotes',
     loadComponent: () =>
       import('./lotes/lotes').then(m => m.Lotes),
   },

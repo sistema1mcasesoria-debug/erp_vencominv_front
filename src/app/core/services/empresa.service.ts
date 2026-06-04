@@ -15,4 +15,11 @@ export class EmpresaService {
   obtenerEmpresas(): Observable<Empresa[]> {
     return this.http.get<Empresa[]>(this.apiUrl);
   }
+  subirLogo(id: number, formData: FormData): Observable<Empresa> {
+    return this.http.patch<Empresa>(`${this.apiUrl}/${id}/logo`, formData);
+  }
+  actualizarIgv(id: number, porcentaje: number): Observable<Empresa> {
+    // Como enviamos por @RequestParam, usamos HttpParams o en la URL
+    return this.http.patch<Empresa>(`${this.apiUrl}/${id}/igv?porcentaje=${porcentaje}`, {});
+  }
 }

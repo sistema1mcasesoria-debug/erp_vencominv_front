@@ -33,4 +33,11 @@ export class UsuarioService {
   obtenerRoles(): Observable<Rol[]> {
     return this.http.get<Rol[]>(`${this.baseUrl}/roles`);
   }
+  subirFotoPerfil(formData: FormData): Observable<Usuario> {
+    return this.http.patch<Usuario>(`${this.baseUrl}/usuarios/perfil/foto`, formData);
+  }
+
+  actualizarMiPerfil(datos: { nombreCompleto: string, password?: string }): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.baseUrl}/usuarios/perfil`, datos);
+  }
 }

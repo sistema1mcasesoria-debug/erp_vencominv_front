@@ -1,5 +1,5 @@
 // src/app/features/ventas/venta-ticket/venta-ticket.ts
-import { Component, input, output, effect, signal } from '@angular/core';
+import { Component, input, output, effect, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VentaResponse } from '../../../core/models/venta.model';
 
@@ -19,6 +19,14 @@ export class VentaTicket {
   empresaRuc = signal('00000000000');
   empresaDireccion = signal('Dirección no registrada');
 
+  porcentajeIgv = computed(() => {
+    const v = this.venta();
+    if (!v || !v.subtotalSinImpuesto || v.subtotalSinImpuesto === 0) return 0;
+    
+    const porcentaje = (v.impuestoTotal / v.subtotalSinImpuesto) * 100;
+    return Math.round(porcentaje); // Redondeamos para que salga 18, 10 o 0 exacto
+  });
+  
   constructor() {
     effect(() => {
       if (this.isOpen()) {

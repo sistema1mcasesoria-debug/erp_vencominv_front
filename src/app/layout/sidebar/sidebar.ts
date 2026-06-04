@@ -19,7 +19,7 @@ interface NavItem {
 })
 export class SidebarComponent {
   private authService = inject(AuthService);
-  private router = inject(Router); // <-- Inyectamos el Router
+  private router = inject(Router); 
 
   collapsed = signal(false);
   expandedSubmenu = signal<string | null>(null);
@@ -30,19 +30,28 @@ export class SidebarComponent {
   avatarLetter  = computed(() => this.usuarioNombre().charAt(0).toUpperCase());
 
   navItems: NavItem[] = [
-    { label: 'Dashboard',   icon: 'grid',          route: '/dashboard',          roles: ['ADMINISTRADOR','CAJERO','ALMACENERO','EMBALADOR'] },
-    { label: 'Inventario',  icon: 'package',       route: '/modules/inventario', roles: ['ADMINISTRADOR','ALMACENERO'] },
-    { label: 'Compras',     icon: 'shopping-cart', route: '/modules/compras',    roles: ['ADMINISTRADOR','ALMACENERO'] },
-    { label: 'Pedidos',     icon: 'clipboard',     route: '/modules/pedidos',    roles: ['ADMINISTRADOR','CAJERO','ALMACENERO','EMBALADOR'] },
-    { label: 'Ventas',      icon: 'receipt',       route: '/modules/ventas',     roles: ['ADMINISTRADOR','CAJERO'] },
+    { label: 'Dashboard',   icon: 'grid',          route: '/dashboard',          roles: ['ADMINISTRADOR'] },
+    { 
+      label: 'Inventario',   
+      icon: 'package',          
+      roles: ['ADMINISTRADOR','ALMACENERO','CAJERO'],
+      children: [
+        { label: 'Productos',      icon: 'tag',       route: '/modules/inventario/lotes',      roles: ['ADMINISTRADOR','ALMACENERO'] },
+        { label: 'Kardex',   icon: 'clipboard', route: '/modules/inventario/kardex', roles: ['ADMINISTRADOR','ALMACENERO'] },
+        { label: 'Compras',     icon: 'shopping-cart', route: '/modules/compras',    roles: ['ADMINISTRADOR','ALMACENERO'] },
+      ]
+    },
+    { 
+      label: 'Ventas',   
+      icon: 'clipboard',          
+      roles: ['ADMINISTRADOR','ALMACENERO','CAJERO'],
+      children: [
+        { label: 'Ventas',      icon: 'receipt',       route: '/modules/ventas',     roles: ['ADMINISTRADOR','CAJERO'] },
+        { label: 'Pedidos',     icon: 'clipboard',     route: '/modules/pedidos',    roles: ['ADMINISTRADOR','CAJERO','ALMACENERO','EMBALADOR'] },
+        { label: 'Creditos',    icon: 'bar-chart',     route: '/modules/creditos',           roles: ['ADMINISTRADOR'] }, 
+      ]
+    },
     { label: 'Clientes',    icon: 'users',         route: '/modules/catalogos/clientes', roles: ['CAJERO'] },
-    
-    // 🔥 CORREGIDOS: Íconos, rutas limpias y roles adecuados
-    { label: 'Kardex',      icon: 'clipboard',     route: '/modules/inventario/kardex',  roles: ['ADMINISTRADOR','ALMACENERO'] },
-    { label: 'Reportes',    icon: 'bar-chart',     route: '/modules/reportes',           roles: ['ADMINISTRADOR'] }, 
-    { label: 'Creditos',    icon: 'bar-chart',     route: '/modules/creditos',           roles: ['ADMINISTRADOR'] }, 
-    
-    // ── Menú Desplegable ──
     { 
       label: 'Catálogos',   
       icon: 'tag',          
@@ -74,17 +83,14 @@ export class SidebarComponent {
     }
   }
 
-  // 1. NUEVA LÓGICA: Alterna el menú y navega al primer hijo
   toggleSubmenu(item: NavItem) {
     if (this.collapsed()) {
       this.collapsed.set(false);
     }
     
     if (this.expandedSubmenu() === item.label) {
-      // Si ya está abierto, lo cerramos
       this.expandedSubmenu.set(null);
     } else {
-      // Si está cerrado, lo abrimos y navegamos a la primera opción automáticamente
       this.expandedSubmenu.set(item.label);
       if (item.children && item.children.length > 0) {
         this.router.navigate([item.children[0].route]);
@@ -92,7 +98,6 @@ export class SidebarComponent {
     }
   }
 
-  // 2. NUEVA FUNCIÓN: Cierra los submenús al hacer clic en un enlace normal
   cerrarSubmenus() {
     this.expandedSubmenu.set(null);
   }

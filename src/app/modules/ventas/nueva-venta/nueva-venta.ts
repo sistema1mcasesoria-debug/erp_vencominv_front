@@ -46,11 +46,6 @@ export class NuevaVenta implements OnInit {
   carrito = signal<ItemCarrito[]>([]);
   tipoComprobante = signal('BOLETA'); 
 
-  // --- NUEVAS VARIABLES DE CRÉDITO ---
-  condicionPago = signal<'CONTADO' | 'CREDITO'>('CONTADO');
-  diasCredito = signal<number>(15);
-  pagoInicial = signal<number>(0);
-  metodoPagoInicial = signal<string>('EFECTIVO');
 
   productosFiltrados = computed(() => {
     const term = this.busquedaProducto().toLowerCase().trim();
@@ -73,7 +68,14 @@ export class NuevaVenta implements OnInit {
   ngOnInit() {
     this.cargarCatalogos();
   }
-
+  // --- NUEVAS VARIABLES DE CRÉDITO ---
+  condicionPago = signal<'CONTADO' | 'CREDITO'>('CONTADO');
+  diasCredito = signal<number>(15);
+  pagoInicial = signal<number>(0);
+  metodoPagoInicial = signal<string>('EFECTIVO');
+  
+  // 👇 NUEVO: Señal para el IGV
+  igvSeleccionado = signal<number>(18); // 18% por defecto
   cargarCatalogos() {
     this.clienteService.obtenerClientes().subscribe(data => this.clientes.set(data));
     this.productoService.obtenerProductos().subscribe(data => this.productos.set(data));
@@ -159,11 +161,13 @@ export class NuevaVenta implements OnInit {
       clienteId: clienteId,
       tipoComprobante: this.tipoComprobante(),
       
-      // Enviamos la data del crédito al backend
       condicionPago: this.condicionPago(),
       diasCredito: this.condicionPago() === 'CREDITO' ? this.diasCredito() : null,
       pagoInicial: this.condicionPago() === 'CREDITO' ? this.pagoInicial() : null,
       metodoPagoInicial: this.condicionPago() === 'CREDITO' ? this.metodoPagoInicial() : null,
+
+      // 👇 ENVIAMOS EL IGV SELECCIONADO
+      igvPorcentaje: this.igvSeleccionado(),
 
       detalles: this.carrito().map(item => ({
         productoId: item.producto.id,
@@ -197,6 +201,7 @@ export class NuevaVenta implements OnInit {
     this.diasCredito.set(15);
     this.pagoInicial.set(0);
     this.metodoPagoInicial.set('EFECTIVO');
+    this.igvSeleccionado.set(18);
   }
 
   cerrar() {

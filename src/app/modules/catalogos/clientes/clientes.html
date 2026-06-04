@@ -1,27 +1,67 @@
 <div class="p-6 bg-gray-50 dark:bg-gray-950 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-200">
   
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Directorio de Clientes</h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestiona la información de contacto y facturación de tu cartera.</p>
-    </div>
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Directorio de Clientes</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestiona la información de contacto y facturación de tu cartera.</p>
+  </div>
+
+  <div class="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-white/10 mb-6 flex flex-wrap lg:flex-nowrap items-end justify-between gap-4 shadow-sm transition-colors duration-200">
     
-    <div class="flex items-center gap-4 w-full sm:w-auto">
-      <div class="relative w-full sm:w-64">
+    <div class="flex flex-wrap items-end gap-3 w-full lg:w-auto">
+      <div>
+        <label class="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">Inicio <span class="text-red-500">*</span></label>
         <input 
-          type="text" 
+          type="date" 
+          [ngModel]="fechaInicio()" 
+          (ngModelChange)="fechaInicio.set($event)"
+          class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">Fin <span class="text-red-500">*</span></label>
+        <input 
+          type="date" 
+          [ngModel]="fechaFin()" 
+          (ngModelChange)="fechaFin.set($event)"
+          class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 w-full sm:w-auto [color-scheme:light] dark:[color-scheme:dark]">
+      </div>
+      <div class="flex gap-2 w-full sm:w-auto">
+        <button 
+          (click)="verDocumentoPdf()" 
+          [disabled]="!fechaInicio() || !fechaFin() || descargando()" 
+          class="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Previsualizar PDF
+        </button>
+        <button 
+          (click)="descargarExcelDirecto()" 
+          [disabled]="!fechaInicio() || !fechaFin() || descargando()" 
+          class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Excel
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+      <div class="relative w-full sm:w-64">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          type="text"
           [ngModel]="busqueda()"
           (ngModelChange)="busqueda.set($event)"
           placeholder="Buscar por DNI/RUC o Nombre..."
-          class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-white/8 rounded-xl px-4 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 transition-colors shadow-sm dark:shadow-none"
-        />
-        <svg class="absolute right-3 top-2.5 w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-sm"
+        >
       </div>
-
       <button 
         (click)="abrirModalNuevo()"
-        class="bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-sm dark:shadow-lg flex-shrink-0 cursor-pointer shadow-blue-600/20 dark:shadow-blue-600/10">
-        + NUEVO CLIENTE
+        class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-blue-600/20 dark:shadow-blue-600/10 whitespace-nowrap">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nuevo
       </button>
     </div>
   </div>
@@ -31,7 +71,22 @@
     <span>{{ errorGlobal() }}</span>
   </div>
 
-  <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/8 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-200">
+  <div *ngIf="viewerAbierto()" class="mb-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm flex flex-col h-[600px] animate-fade-in transition-colors duration-200">
+    <div class="bg-gray-100 dark:bg-gray-800/80 px-4 py-3 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+      <div class="flex items-center gap-2 text-gray-800 dark:text-gray-200 font-bold text-sm">
+        <svg class="w-5 h-5 text-red-600 dark:text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        {{ tituloDocumento() }}
+      </div>
+      <button (click)="cerrarVisor()" class="text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700" title="Cerrar previsualización">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="flex-1 w-full bg-gray-200 dark:bg-[#525659]">
+      <iframe *ngIf="pdfUrlSegura()" [src]="pdfUrlSegura()" class="w-full h-full border-0"></iframe>
+    </div>
+  </div>
+
+  <div *ngIf="!viewerAbierto()" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/8 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl transition-colors duration-200 animate-fade-in">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
@@ -97,7 +152,6 @@
       </div>
 
       <div class="p-6 space-y-4">
-        
         <div *ngIf="errorGlobal()" class="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-600 dark:text-red-400 flex items-center gap-2 transition-colors">
           <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           {{ errorGlobal() }}
