@@ -1,4 +1,3 @@
-// src/app/features/pedidos/nuevo-pedido/nuevo-pedido.ts
 import { Component, OnInit, signal, computed, inject, input, output, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -52,6 +51,15 @@ export class NuevoPedido implements OnInit {
   carrito = signal<ItemPedido[]>([]);
   vendedorId = signal<number>(0);
 
+  // Variables base enviadas por defecto si no se usan
+  condicionPago = signal<'CONTADO' | 'CREDITO'>('CONTADO');
+  diasCredito = signal<number>(15);
+  pagoInicial = signal<number>(0);
+  metodoPagoInicial = signal<string>('EFECTIVO');
+  
+  // 👇 SEÑAL DEL IGV PARA EL FORMULARIO
+  igvSeleccionado = signal<number>(18);
+
   productosFiltrados = computed(() => {
     const term = this.busquedaProducto().toLowerCase().trim();
     if (!term) return [];
@@ -72,7 +80,6 @@ export class NuevoPedido implements OnInit {
   ngOnInit() {
     this.clienteService.obtenerClientes().subscribe(data => this.clientes.set(data));
     this.productoService.obtenerProductos().subscribe(data => this.productos.set(data));
-    // Simulación de embaladores
     this.embaladores.set([{ id: 5, nombre: 'Juan Pérez (Almacén)' }]);
   }
 
@@ -81,7 +88,7 @@ export class NuevoPedido implements OnInit {
       const token = localStorage.getItem('erp_token');
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        this.vendedorId.set(payload.usuario_id); // ← nombre exacto del claim
+        this.vendedorId.set(payload.usuario_id);
       }
     } catch (e) { 
       console.error('Error al leer token'); 
@@ -140,7 +147,6 @@ export class NuevoPedido implements OnInit {
     this.errorGlobal.set('');
   }
 
-  // --- LÓGICA DE GUARDADO ---
   guardarPedido() {
     if (this.carrito().length === 0) {
       this.errorGlobal.set('Agrega al menos un producto al pedido.');
@@ -150,7 +156,6 @@ export class NuevoPedido implements OnInit {
     this.submitting.set(true);
 
     if (this.modoNuevoCliente()) {
-      // 1. Validar y Crear Cliente Nuevo Primero
       if (!this.formCliente().nombreCompleto || !this.formCliente().documentoIdentidad) {
         this.errorGlobal.set('Complete los campos obligatorios del nuevo cliente.');
         this.submitting.set(false);
@@ -166,7 +171,6 @@ export class NuevoPedido implements OnInit {
       });
 
     } else {
-      // 2. Usar Cliente Existente
       if (!this.clienteSeleccionado()) {
         this.errorGlobal.set('Debes seleccionar un cliente.');
         this.submitting.set(false);
@@ -181,6 +185,16 @@ export class NuevoPedido implements OnInit {
       clienteId: clienteId,
       vendedorId: this.vendedorId(),
       embaladorId: this.requiereEmbalador() ? this.embaladorSeleccionado() : null,
+      
+      // 👇 SE ENVÍA EL IGV SELECCIONADO
+      igvPorcentaje: this.igvSeleccionado(),
+      
+      // Se envían datos por defecto para evitar errores en el backend
+      condicionPago: this.condicionPago(),
+      diasCredito: this.diasCredito(),
+      pagoInicial: this.pagoInicial(),
+      metodoPagoInicial: this.metodoPagoInicial(),
+
       detalles: this.carrito().map(item => ({
         productoId: item.producto.id,
         cantidad: item.cantidad,
@@ -210,6 +224,8 @@ export class NuevoPedido implements OnInit {
     this.requiereEmbalador.set(false);
     this.embaladorSeleccionado.set(null);
     this.errorGlobal.set('');
+    // 👇 ASEGURARNOS DE RESETEAR EL IGV A 18%
+    this.igvSeleccionado.set(18);
   }
 
   cerrar() {

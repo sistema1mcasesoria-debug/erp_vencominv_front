@@ -10,6 +10,13 @@ export interface PedidoRequest {
   clienteId: number;
   vendedorId: number;
   embaladorId: number | null;
+  
+  igvPorcentaje: number;
+  condicionPago: 'CONTADO' | 'CREDITO';
+  diasCredito: number | null;
+  pagoInicial: number | null;
+  metodoPagoInicial: string | null;
+
   detalles: PedidoDetalleRequest[];
 }
 
