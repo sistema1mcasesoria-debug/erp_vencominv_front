@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 // ── Interfaces ─────────────────────────────────────────────
 export interface LoginRequest {
@@ -21,11 +22,9 @@ export interface CurrentUser {
   nombreCompleto: string;
   rol: 'ADMINISTRADOR' | 'CAJERO' | 'ALMACENERO' | 'EMBALADOR';
   fotoUrl?: string;
-  logoUrl?: string; // 👈 1. Añadido aquí
+  logoUrl?: string; 
   igvPorcentaje?: number;
 }
-
-// ── Helpers JWT ────────────────────────────────────────────
 function decodeJwt(token: string): CurrentUser | null {
   try {
     const payload = token.split('.')[1];
@@ -39,7 +38,6 @@ function decodeJwt(token: string): CurrentUser | null {
       rol:            decoded.rol,
       fotoUrl:        decoded.foto_url ?? '',
       logoUrl:        decoded.logo_url ?? '',
-      // 👇 AÑADE ESTA LÍNEA (manejando ambos formatos por si acaso)
       igvPorcentaje:  decoded.igvPorcentaje ?? decoded.igv_porcentaje ?? 18, 
     };
   } catch {
@@ -47,11 +45,12 @@ function decodeJwt(token: string): CurrentUser | null {
   }
 }
 
-// ── Service ────────────────────────────────────────────────
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http   = inject(HttpClient);
   private router = inject(Router);
+
+  private baseUrl = `${environment.apiUrl}/auth`;
 
   private readonly TOKEN_KEY = 'erp_token';
 
@@ -68,16 +67,13 @@ export class AuthService {
         nombreCompleto: datosActualizados.nombreCompleto ?? usuarioActual.nombreCompleto,
         fotoUrl: datosActualizados.fotoUrl ?? usuarioActual.fotoUrl,
         logoUrl: datosActualizados.logoUrl ?? usuarioActual.logoUrl,
-        // 👇 2. Asigna el nuevo valor aquí
         igvPorcentaje: datosActualizados.igvPorcentaje ?? usuarioActual.igvPorcentaje
       });
     }
   }
-
-  // ── Login ──────────────────────────────────────────────
   login(credentials: LoginRequest) {
     return this.http
-      .post<LoginResponse>('http://localhost:8080/api/v1/auth/login', credentials)
+      .post<LoginResponse>(`${this.baseUrl}/login`, credentials)
       .pipe(
         tap(res => {
           localStorage.setItem(this.TOKEN_KEY, res.token);
@@ -86,14 +82,12 @@ export class AuthService {
       );
   }
 
-  // ── Logout ─────────────────────────────────────────────
   logout() {
     localStorage.removeItem(this.TOKEN_KEY);
     this.currentUser.set(null);
     this.router.navigate(['/auth/login']);
   }
 
-  // ── Token ──────────────────────────────────────────────
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
