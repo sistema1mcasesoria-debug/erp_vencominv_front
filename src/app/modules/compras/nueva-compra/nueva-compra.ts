@@ -40,9 +40,11 @@ export class NuevaCompra implements OnInit {
   
   proveedoresFiltrados = computed(() => {
     const term = this.busquedaProveedor().toLowerCase();
-    return this.proveedores().filter(p => p.razonSocial.toLowerCase().includes(term));
+    return this.proveedores().filter(p =>
+      p.razonSocial.toLowerCase().includes(term) ||
+      p.documentoIdentidad?.toLowerCase().includes(term)
+    );
   });
-
   formComprobante = signal('');
   detalles = signal<CompraDetalleRequest[]>([]);
   submitting = signal(false);
